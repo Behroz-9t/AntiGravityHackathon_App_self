@@ -43,6 +43,8 @@ wheels/
 mobile/node_modules/
 mobile/dist/
 mobile/.expo/
+mobile/android/
+mobile/ios/
 
 # Testing
 .pytest_cache/
