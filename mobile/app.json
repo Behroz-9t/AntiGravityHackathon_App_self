@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "اہلِ فن",
-    "slug": "mobile",
+    "name": "اہلِ فن (Self)",
+    "slug": "mobile-self",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,14 +27,15 @@
         "ACCESS_FINE_LOCATION",
         "FOREGROUND_SERVICE"
       ],
-      "package": "com.ahlefun.app"
+      "package": "com.ahlefun.self"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "owner": "behroz123",
     "extra": {
       "eas": {
-        "projectId": "96fbdd10-d3d2-4d99-8e90-f8104d5ff526"
+        "projectId": "1d7d73e5-14aa-4535-a62b-9a984fc2dba0"
       }
     }
   }
