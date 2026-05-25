@@ -12,9 +12,16 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "https://antigravityhackathon-app-self.onrender.com/api/v1"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "https://antigravityhackathon-app-self.onrender.com/api/v1"
+      }
+    }
   },
   "submit": {
     "production": {}
