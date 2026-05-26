@@ -158,7 +158,7 @@ export default function AuthScreen() {
 
                         <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
                             <LinearGradient
-                                colors={G.brand}
+                                colors={GRADIENTS.brand}
                                 style={styles.submitGrad}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
