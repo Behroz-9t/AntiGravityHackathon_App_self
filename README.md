@@ -130,7 +130,7 @@ Created in a fast-paced hackathon sprint, this project demonstrates end-to-end i
 ## 👥 The Hackathon Team
 This project was designed and built as a team effort during the hackathon:
 
-*   **Your Name** (Team Lead) — UI/UX Design System, Timezone Calculations, & Integration
+*   **Behroz Musharraf** (Team Lead) — UI/UX Design System, Timezone Calculations, & Integration
 *   **Arish Ahmed Khan** — Core Mobile App Logic & Navigation
 *   **Muhammad Abdullah Iqbal** — Backend FastAPI Services & Database Architecture
 *   **Nasit Furqan** — Multi-Agent AI Framework & Prompt Engineering
