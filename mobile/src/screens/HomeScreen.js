@@ -193,6 +193,64 @@ export default function HomeScreen({ navigation }) {
     const fadeAnim  = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(30)).current;
 
+    // Tab switching animations for iOS sliding feel
+    const tabFadeAnim = useRef(new Animated.Value(1)).current;
+    const tabSlideAnim = useRef(new Animated.Value(0)).current;
+    const toggleAnim = useRef(new Animated.Value(0)).current;
+    const [toggleWidth, setToggleWidth] = useState(0);
+
+    const handleModeChange = (newMode) => {
+        if (newMode === mode) return;
+        setErrorMsg('');
+
+        // 1. Slide the toggle background indicator
+        Animated.timing(toggleAnim, {
+            toValue: newMode === 'self' ? 0 : 1,
+            duration: 250,
+            useNativeDriver: true,
+        }).start();
+
+        // 2. Fade out & slide current content slightly up
+        Animated.parallel([
+            Animated.timing(tabFadeAnim, {
+                toValue: 0,
+                duration: 120,
+                useNativeDriver: true,
+            }),
+            Animated.timing(tabSlideAnim, {
+                toValue: -6,
+                duration: 120,
+                useNativeDriver: true,
+            })
+        ]).start(() => {
+            // Swap active mode state
+            setMode(newMode);
+            // Position new content to slide up from bottom
+            tabSlideAnim.setValue(6);
+
+            // 3. Fade in & slide back to origin
+            Animated.parallel([
+                Animated.timing(tabFadeAnim, {
+                    toValue: 1,
+                    duration: 200,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(tabSlideAnim, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: true,
+                })
+            ]).start();
+        });
+    };
+
+    const onToggleLayout = (e) => {
+        const { width } = e.nativeEvent.layout;
+        if (width > 0) {
+            setToggleWidth((width - 14) / 2); // 10px outer padding (5x2), 4px gap
+        }
+    };
+
     const initiateLocationFetch = async () => {
         setLocationLoading(true);
         setErrorMsg('');
@@ -366,36 +424,71 @@ export default function HomeScreen({ navigation }) {
                         </TouchableOpacity>
 
                         {/* Mode Toggle */}
-                        <View style={[styles.modeToggle, { backgroundColor: T.card, borderColor: T.border }]}>
+                        <View style={[styles.modeToggle, { backgroundColor: T.card, borderColor: T.border }]} onLayout={onToggleLayout}>
+                            {toggleWidth > 0 && (
+                                <Animated.View
+                                    style={{
+                                        position: 'absolute',
+                                        top: 5,
+                                        bottom: 5,
+                                        left: 5,
+                                        width: toggleWidth,
+                                        borderRadius: 14,
+                                        overflow: 'hidden',
+                                        transform: [
+                                            {
+                                                translateX: toggleAnim.interpolate({
+                                                    inputRange: [0, 1],
+                                                    outputRange: [0, toggleWidth + 4],
+                                                })
+                                            }
+                                        ]
+                                    }}
+                                >
+                                    <LinearGradient
+                                        colors={G.brand}
+                                        style={StyleSheet.absoluteFillObject}
+                                        start={{x:0,y:0}}
+                                        end={{x:1,y:0}}
+                                    />
+                                </Animated.View>
+                            )}
                             <TouchableOpacity
-                                style={[styles.modeBtn, mode === 'self' && styles.modeBtnActive]}
-                                onPress={() => { setMode('self'); setErrorMsg(''); }}
+                                style={styles.modeBtn}
+                                onPress={() => handleModeChange('self')}
+                                activeOpacity={0.9}
                             >
-                                {mode === 'self'
-                                    ? <LinearGradient colors={G.brand} style={styles.modeBtnGrad} start={{x:0,y:0}} end={{x:1,y:0}}>
-                                        <MapPin size={14} color="#0B0C0E" />
-                                        <Text style={styles.modeBtnTextActive}>For Myself</Text>
-                                      </LinearGradient>
-                                    : <View style={styles.modeBtnInner}><MapPin size={14} color={T.sub} /><Text style={[styles.modeBtnText, { color: T.sub }]}>For Myself</Text></View>
-                                }
+                                <View style={styles.modeBtnInner}>
+                                    <MapPin size={14} color={mode === 'self' ? '#0B0C0E' : T.sub} />
+                                    <Text style={[
+                                        styles.modeBtnText,
+                                        { color: mode === 'self' ? '#0B0C0E' : T.sub, fontWeight: mode === 'self' ? '700' : '600' }
+                                    ]}>
+                                        For Myself
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={[styles.modeBtn, mode === 'others' && styles.modeBtnActive]}
-                                onPress={() => { setMode('others'); setErrorMsg(''); }}
+                                style={styles.modeBtn}
+                                onPress={() => handleModeChange('others')}
+                                activeOpacity={0.9}
                             >
-                                {mode === 'others'
-                                    ? <LinearGradient colors={G.brand} style={styles.modeBtnGrad} start={{x:0,y:0}} end={{x:1,y:0}}>
-                                        <Users size={14} color="#0B0C0E" />
-                                        <Text style={styles.modeBtnTextActive}>Book for Others</Text>
-                                      </LinearGradient>
-                                    : <View style={styles.modeBtnInner}><Users size={14} color={T.sub} /><Text style={[styles.modeBtnText, { color: T.sub }]}>Book for Others</Text></View>
-                                }
+                                <View style={styles.modeBtnInner}>
+                                    <Users size={14} color={mode === 'others' ? '#0B0C0E' : T.sub} />
+                                    <Text style={[
+                                        styles.modeBtnText,
+                                        { color: mode === 'others' ? '#0B0C0E' : T.sub, fontWeight: mode === 'others' ? '700' : '600' }
+                                    ]}>
+                                        Book for Others
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                         </View>
 
                         {/* Search Card */}
                         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
                             <View style={[styles.searchCard, { backgroundColor: T.card, borderColor: T.border }]}>
+                                <Animated.View style={{ opacity: tabFadeAnim, transform: [{ translateY: tabSlideAnim }] }}>
 
                                 {mode === 'self' ? (
                                     <>
@@ -610,6 +703,7 @@ export default function HomeScreen({ navigation }) {
                                         }
                                     </LinearGradient>
                                 </TouchableOpacity>
+                                </Animated.View>
                             </View>
                         </Animated.View>
 

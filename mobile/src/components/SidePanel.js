@@ -182,7 +182,7 @@ export default function SidePanel() {
                                 style={[
                                     styles.bookingCard, 
                                     isCancelled ? styles.bookingCardCancelled : styles.bookingCardCompleted,
-                                    { backgroundColor: isCancelled ? 'rgba(239, 68, 68, 0.05)' : (isDarkMode ? 'rgba(16, 185, 129, 0.04)' : '#FFFFFF') }
+                                    { backgroundColor: isCancelled ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.04)' }
                                 ]}
                             >
                                 <View style={styles.bookingHeader}>
