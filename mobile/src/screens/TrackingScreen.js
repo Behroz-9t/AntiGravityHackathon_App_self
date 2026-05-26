@@ -11,6 +11,7 @@ import RatingModal from '../components/RatingModal';
 import { getTheme, getGradients, SHADOWS } from '../theme';
 import { sendImmediateNotification } from '../notifications';
 import { downloadBookingLogs } from '../utils/logExporter';
+import { apiStartBooking, apiCompleteBooking } from '../api';
 
 /* ─── Status flow ─────────────────────────────────────────────────────── */
 const STATUSES = [
@@ -317,6 +318,12 @@ export default function TrackingScreen({ route, navigation }) {
         setScheduledMode(false);
         updateStatus(bookingId, 'Pending');
 
+        // Notify backend of start
+        const providerId = providerData?.id || bookingData?.provider_id;
+        if (providerId) {
+            apiStartBooking(providerId).catch(err => console.warn('Failed to notify backend booking start:', err));
+        }
+
         // In-app toast overlay
         setShowNotification(true);
         Animated.sequence([
@@ -325,9 +332,9 @@ export default function TrackingScreen({ route, navigation }) {
             Animated.timing(notificationAnim, { toValue: -140, duration: 300, easing: Easing.out(Easing.cubic), useNativeDriver: true })
         ]).start(() => setShowNotification(false));
 
-        // Cross-platform push notification (expo-notifications on native, Web API on browser)
+        // Cross-platform push notification
         sendImmediateNotification(
-            '🚀 Booking Started — ???? ??',
+            '🚀 Booking Started — أهلِ فن',
             `${providerData?.provider_name ?? 'Your provider'} is on the way for ${bookingMeta.timeSlot ?? 'your scheduled slot'}!`
         );
     };
@@ -351,6 +358,18 @@ export default function TrackingScreen({ route, navigation }) {
                     }).start();
                 }
                 if (i + 1 === STATUSES.length - 1) {
+                    // Notify backend of completion to release provider
+                    const providerId = providerData?.id || bookingData?.provider_id;
+                    if (providerId) {
+                        apiCompleteBooking(providerId).catch(err => console.warn('Failed to notify backend booking completion:', err));
+                    }
+
+                    // Fire completion notification
+                    sendImmediateNotification(
+                        '✅ Service Completed — أهلِ فن',
+                        `Your service with ${providerData?.provider_name ?? 'your provider'} has been completed successfully. Please take a moment to rate them!`
+                    );
+
                     setTimeout(() => setShowRating(true), 1200);
                 }
             }, cum);

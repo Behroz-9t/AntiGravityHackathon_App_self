@@ -175,3 +175,27 @@ export const apiCancelBooking = async (providerId, reason) => {
         return { success: false, error: 'Connection failed.' };
     }
 };
+
+export const apiStartBooking = async (providerId) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/bookings/start`, {
+            provider_id: providerId
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Start Booking API Error:', error);
+        return { success: false, error: 'Connection failed.' };
+    }
+};
+
+export const apiCompleteBooking = async (providerId) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/bookings/complete`, {
+            provider_id: providerId
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Complete Booking API Error:', error);
+        return { success: false, error: 'Connection failed.' };
+    }
+};

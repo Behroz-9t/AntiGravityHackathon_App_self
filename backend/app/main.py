@@ -52,10 +52,29 @@ class CancelBookingRequest(BaseModel):
     provider_id: str
     reason: str
 
+class StartBookingRequest(BaseModel):
+    provider_id: str
+
+class CompleteBookingRequest(BaseModel):
+    provider_id: str
+
 @app.post("/api/v1/bookings/cancel")
 async def cancel_booking(req: CancelBookingRequest):
     res = update_provider_availability(req.provider_id, True)
+    print(f"[NOTIFICATION] Booking cancelled. Provider {req.provider_id} released.")
     return {"success": res}
+
+@app.post("/api/v1/bookings/start")
+async def start_booking(req: StartBookingRequest):
+    res = update_provider_availability(req.provider_id, False)
+    print(f"[NOTIFICATION] Booking started. Provider {req.provider_id} is now busy.")
+    return {"success": res, "message": "Booking started notification received."}
+
+@app.post("/api/v1/bookings/complete")
+async def complete_booking(req: CompleteBookingRequest):
+    res = update_provider_availability(req.provider_id, True)
+    print(f"[NOTIFICATION] Booking completed. Provider {req.provider_id} is now available.")
+    return {"success": res, "message": "Booking completed notification received."}
 
 @app.get("/")
 async def root():

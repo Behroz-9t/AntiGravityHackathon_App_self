@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiRegister, apiLogin, apiCancelBooking } from './api';
+import { apiRegister, apiLogin, apiCancelBooking, apiCompleteBooking } from './api';
 
 const BookingContext = createContext(null);
 
@@ -113,8 +113,18 @@ export function BookingProvider({ children }) {
         return { success: true };
     };
 
-    const rateBooking = (id, rating) => {
+    const rateBooking = async (id, rating) => {
+        const target = bookings.find(b => b.id === id);
         setBookings(prev => prev.map(b => b.id === id ? { ...b, rating, status: 'Completed' } : b));
+
+        const providerId = target?.rawData?.booking?.provider_id || target?.provider?.id;
+        if (providerId) {
+            try {
+                await apiCompleteBooking(providerId);
+            } catch (err) {
+                console.warn('Failed to release provider on backend during rating:', err);
+            }
+        }
     };
 
     const saveChatHistory = (id, chatMessages, chatHistoryRaw, chatBackend) => {
