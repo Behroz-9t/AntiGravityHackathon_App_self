@@ -13,8 +13,8 @@ import {
 import { parseTimeSlot } from './TrackingScreen';
 
 const C = {
-    bg: '#0A0B0D', card: 'rgba(18, 20, 23, 0.95)', border: 'rgba(255, 255, 255, 0.08)',
-    text: '#F8FAFC', sub: '#94A3B8', primary: '#38BDF8', gold: '#D4AF37',
+    bg: '#0B0C0E', card: '#15181F', border: 'rgba(245, 197, 24, 0.08)',
+    text: '#F8FAFC', sub: '#94A3B8', primary: '#F5C518', gold: '#F5C518',
 };
 
 export default function BookingScreen({ route, navigation }) {
@@ -100,7 +100,7 @@ export default function BookingScreen({ route, navigation }) {
                 <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
                     {/* Provider banner */}
                     <LinearGradient colors={G.darkCard} style={styles.providerBanner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                        <View style={[styles.avatarCircle, { backgroundColor: isDarkMode ? 'rgba(56,189,248,0.12)' : 'rgba(56,189,248,0.06)', borderColor: '#38BDF8' }]}>
+                        <View style={[styles.avatarCircle, { backgroundColor: 'rgba(245,197,24,0.08)', borderColor: T.accent1 }]}>
                             <Text style={styles.avatarText}>{provider.provider_name[0]}</Text>
                         </View>
                         <Text style={[styles.bannerName, { color: T.textLight }]}>{provider.provider_name}</Text>
@@ -161,7 +161,7 @@ export default function BookingScreen({ route, navigation }) {
                             ) : (
                                 bookingMeta?.userPhone ? (
                                     <>
-                                        <Text style={[styles.detailTitle, { color: '#38BDF8' }]}>📞 Contact Information</Text>
+                                        <Text style={[styles.detailTitle, { color: T.accent1 }]}>📞 Contact Information</Text>
                                         <View style={[styles.detailRow, { borderBottomColor: T.border }]}>
                                             <Text style={[styles.detailLabel, { color: T.sub }]}>Your Phone</Text>
                                             <Text style={[styles.detailValue, { color: T.textLight }]}>{bookingMeta.userPhone}</Text>
@@ -173,7 +173,7 @@ export default function BookingScreen({ route, navigation }) {
                     ) : null}
 
                     {/* Pricing estimate */}
-                    <View style={[styles.priceCard, { backgroundColor: isDarkMode ? 'rgba(56,189,248,0.06)' : 'rgba(56,189,248,0.12)', borderColor: T.border }]}>
+                    <View style={[styles.priceCard, { backgroundColor: 'rgba(245,197,24,0.06)', borderColor: T.border }]}>
                         <Text style={[styles.priceLabel, { color: T.sub }]}>Estimated Cost</Text>
                         <Text style={styles.priceValue}>PKR 500 – 2,000</Text>
                         <Text style={[styles.priceSub, { color: T.sub }]}>Final price agreed on-site</Text>
@@ -185,7 +185,7 @@ export default function BookingScreen({ route, navigation }) {
                         onPress={handleConfirm}
                         disabled={confirmed}
                     >
-                        <LinearGradient colors={['#38BDF8','#0284C7']} style={styles.confirmGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+                        <LinearGradient colors={G.brand} style={styles.confirmGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
                             <Text style={styles.confirmText}>{confirmed ? 'Connecting to Provider…' : 'Confirm & Chat with Provider  →'}</Text>
                         </LinearGradient>
                     </TouchableOpacity>
@@ -205,7 +205,7 @@ export default function BookingScreen({ route, navigation }) {
 
                                 // Confirmation notification
                                 await sendImmediateNotification(
-                                    '✅ Booking Confirmed — ???? ??',
+                                    '✅ Booking Confirmed — اہل فن',
                                     `${providerName} is assigned for your ${service} — ${timeSlot}.`
                                 );
 
@@ -213,7 +213,7 @@ export default function BookingScreen({ route, navigation }) {
                                 const slotDate = parseTimeSlot(timeSlot);
                                 if (slotDate) {
                                     await scheduleReminderNotification(
-                                        '⏰ Upcoming Booking — ???? ??',
+                                        '⏰ Upcoming Booking — اہل فن',
                                         `Reminder: ${providerName} is arriving in 2 hours for your ${service} at ${timeSlot}.`,
                                         slotDate
                                     );
@@ -223,7 +223,7 @@ export default function BookingScreen({ route, navigation }) {
                             }}
                             disabled={confirmed}
                         >
-                            <Text style={[styles.scheduleHomeText, { color: '#38BDF8' }]}>📅 Confirm & Go Home</Text>
+                            <Text style={[styles.scheduleHomeText, { color: T.accent1 }]}>📅 Confirm & Go Home</Text>
                         </TouchableOpacity>
                     )}
 
@@ -239,13 +239,13 @@ export default function BookingScreen({ route, navigation }) {
 }
 
 const makeStyles = (T) => {
-    const isDark = T.bg === '#0A0B0D';
+    const isDark = true;
     return StyleSheet.create({
         safe: { flex: 1, backgroundColor: T.bg },
         center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
         errorText: { color: '#EF4444', fontSize: 16, marginBottom: 20 },
-        backBtn: { backgroundColor: '#38BDF8', borderRadius: 12, paddingHorizontal: 24, paddingVertical: 12 },
-        backBtnText: { color: '#000', fontWeight: '700' },
+        backBtn: { backgroundColor: T.accent1, borderRadius: 12, paddingHorizontal: 24, paddingVertical: 12 },
+        backBtnText: { color: '#0B0C0E', fontWeight: '700' },
 
         header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 16, paddingTop: 48 },
         headerBack: { width: 40, height: 40, justifyContent: 'center' },
@@ -254,9 +254,9 @@ const makeStyles = (T) => {
 
         scroll: { padding: 16 },
 
-        providerBanner: { borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 16, borderWidth: 1, borderColor: isDark ? 'rgba(124,58,237,0.3)' : 'rgba(124,58,237,0.15)' },
-        avatarCircle: { width: 72, height: 72, borderRadius: 36, backgroundColor: isDark ? 'rgba(56,189,248,0.12)' : 'rgba(56,189,248,0.06)', borderWidth: 2, borderColor: '#38BDF8', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-        avatarText: { color: '#38BDF8', fontSize: 30, fontWeight: '800' },
+        providerBanner: { borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 16, borderWidth: 1, borderColor: T.border },
+        avatarCircle: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(245,197,24,0.08)', borderWidth: 2, borderColor: T.accent1, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+        avatarText: { color: T.accent1, fontSize: 30, fontWeight: '800' },
         bannerName: { color: T.textLight, fontSize: 20, fontWeight: '800', marginBottom: 4 },
         bannerService: { color: T.sub, fontSize: 13, marginBottom: 16 },
         bannerMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
@@ -269,9 +269,9 @@ const makeStyles = (T) => {
         detailLabel: { color: T.sub, fontSize: 14 },
         detailValue: { color: T.textLight, fontSize: 14, fontWeight: '600', flex: 1, textAlign: 'right' },
 
-        priceCard: { backgroundColor: isDark ? 'rgba(56,189,248,0.06)' : 'rgba(56,189,248,0.12)', borderRadius: 20, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: T.border, alignItems: 'center' },
+        priceCard: { backgroundColor: 'rgba(245,197,24,0.06)', borderRadius: 20, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: T.border, alignItems: 'center' },
         priceLabel: { color: T.sub, fontSize: 13, marginBottom: 6 },
-        priceValue: { color: '#38BDF8', fontSize: 24, fontWeight: '800' },
+        priceValue: { color: T.accent1, fontSize: 24, fontWeight: '800' },
         priceSub: { color: T.sub, fontSize: 11, marginTop: 4 },
 
         confirmBtn: { borderRadius: 20, overflow: 'hidden', marginBottom: 12 },
@@ -290,19 +290,19 @@ const makeStyles = (T) => {
             alignItems: 'center',
             marginBottom: 12,
         },
-        scheduleHomeText: { color: '#38BDF8', fontSize: 16, fontWeight: '700' },
+        scheduleHomeText: { color: T.accent1, fontSize: 16, fontWeight: '700' },
 
         notifPill: {
             marginTop: 10,
             paddingVertical: 10,
             paddingHorizontal: 12,
             borderRadius: 12,
-            backgroundColor: 'rgba(0,229,255,0.07)',
+            backgroundColor: 'rgba(245, 197, 24, 0.08)',
             borderWidth: 1,
-            borderColor: 'rgba(0,229,255,0.2)',
+            borderColor: 'rgba(245, 197, 24, 0.2)',
         },
         notifPillText: {
-            color: '#00E5FF',
+            color: T.accent1,
             fontSize: 12,
             fontWeight: '600',
             lineHeight: 18,

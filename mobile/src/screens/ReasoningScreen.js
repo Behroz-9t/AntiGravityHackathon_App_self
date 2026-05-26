@@ -8,13 +8,13 @@ import { getTheme, getGradients, SHADOWS } from '../theme';
 import { useBookings } from '../BookingContext';
 
 const AGENT_META = {
-    'Intent Agent':    { color: '#1A6BFF', icon: '🧠', label: 'Intent' },
-    'Location Agent':  { color: '#8B5CF6', icon: '📍', label: 'Location' },
-    'Provider Agent':  { color: '#F5A623', icon: '🔍', label: 'Discovery' },
-    'Ranking Agent':   { color: '#22C55E', icon: '🏆', label: 'Ranking' },
-    'Booking Agent':   { color: '#3B82F6', icon: '📋', label: 'Booking' },
-    'Follow-Up Agent': { color: '#8B5CF6', icon: '🔔', label: 'Follow-Up' },
-    'Orchestrator':    { color: '#94A3B8', icon: '⚙️', label: 'System' },
+    'Intent Agent':    { color: '#F5C518', icon: '🧠', label: 'Intent' },
+    'Location Agent':  { color: '#F5C518', icon: '📍', label: 'Location' },
+    'Provider Agent':  { color: '#F5C518', icon: '🔍', label: 'Discovery' },
+    'Ranking Agent':   { color: '#10B981', icon: '🏆', label: 'Ranking' },
+    'Booking Agent':   { color: '#F5C518', icon: '📋', label: 'Booking' },
+    'Follow-Up Agent': { color: '#F5C518', icon: '🔔', label: 'Follow-Up' },
+    'Orchestrator':    { color: '#8E94A2', icon: '⚙️', label: 'System' },
 };
 
 /* ─── Progress Stepper ──────────────────────────────────────────────────── */

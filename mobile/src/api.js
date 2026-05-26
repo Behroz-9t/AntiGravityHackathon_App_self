@@ -82,6 +82,38 @@ export const getUserLocation = async () => {
     }
 };
 
+export const getReadableAddress = async (lat, lng) => {
+    try {
+        if (Platform.OS === 'web') {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=14&addressdetails=1`, {
+                headers: { 'User-Agent': 'AntiGravityServiceApp/1.0' }
+            });
+            const data = await resp.json();
+            const addr = data.address || {};
+            const neighbourhood = addr.suburb || addr.neighbourhood || addr.city_district || addr.county || addr.town;
+            const city = addr.city || addr.town || addr.village || addr.state;
+            if (neighbourhood && city && neighbourhood !== city) {
+                return `${neighbourhood}, ${city}`;
+            }
+            return city || neighbourhood || data.display_name.split(',')[0] || `${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`;
+        } else {
+            const address = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+            if (address && address.length > 0) {
+                const item = address[0];
+                const name = item.district || item.name || item.street || '';
+                const city = item.city || item.subregion || item.region || '';
+                if (name && city && name !== city) {
+                    return `${name}, ${city}`;
+                }
+                return city || name || `${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`;
+            }
+        }
+    } catch (e) {
+        console.warn('Reverse geocode failed:', e);
+    }
+    return `${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`;
+};
+
 export const orchestrateRequest = async (query, userCoords = null, bookingMeta = {}) => {
     try {
         const payload = {

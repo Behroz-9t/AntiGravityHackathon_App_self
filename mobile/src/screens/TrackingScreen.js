@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     View, Text, StyleSheet, SafeAreaView, Animated,
     TouchableOpacity, ScrollView, Platform, useWindowDimensions,
-    Modal, TextInput, PanResponder,
+    Modal, TextInput, PanResponder, Easing,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,8 +14,8 @@ import { downloadBookingLogs } from '../utils/logExporter';
 
 /* ─── Status flow ─────────────────────────────────────────────────────── */
 const STATUSES = [
-    { key: 'Pending',   label: 'Pending',             icon: '⏳', color: '#F59E0B', ms: 2500  },
-    { key: 'Arriving',  label: 'Provider Arriving',    icon: '🚗', color: '#1A6BFF', ms: 30000 },
+    { key: 'Pending',   label: 'Pending',             icon: '⏳', color: '#F5C518', ms: 2500  },
+    { key: 'Arriving',  label: 'Provider Arriving',    icon: '🚗', color: '#F5C518', ms: 30000 },
     { key: 'Working',   label: 'Service In Progress',  icon: '🔧', color: '#8B5CF6', ms: 8000  },
     { key: 'Completed', label: 'Done!',                icon: '✅', color: '#22C55E', ms: 0     },
 ];
@@ -160,8 +160,8 @@ export default function TrackingScreen({ route, navigation }) {
                 Animated.spring(sheetHeight, {
                     toValue: targetHeight,
                     useNativeDriver: false,
-                    tension: 40,
-                    friction: 8,
+                    damping: 18,
+                    stiffness: 120,
                 }).start(() => {
                     lastHeight.current = targetHeight;
                 });
@@ -169,17 +169,13 @@ export default function TrackingScreen({ route, navigation }) {
         })
     ).current;
 
-    const mapBgColor = isDarkMode ? '#0A0B18' : '#F8FAFC';
-    const tileLayerUrl = isDarkMode 
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' 
-        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-    const routeLineColor = isDarkMode ? '#00E5FF' : '#0284C7';
-    const carBg = isDarkMode ? 'linear-gradient(145deg,#0d1421,#1a2340)' : 'linear-gradient(145deg,#ffffff,#f1f5f9)';
-    const carBorderColor = isDarkMode ? '#00E5FF' : '#0284C7';
-    const viRingBorderColor = isDarkMode ? 'rgba(0,229,255,0.5)' : 'rgba(2,132,199,0.5)';
-    const headerGradColors = isDarkMode 
-        ? ['rgba(10,10,20,0.95)', 'rgba(10,10,20,0)'] 
-        : ['rgba(248,250,252,0.95)', 'rgba(248,250,252,0)'];
+    const mapBgColor = '#0B0C0E';
+    const tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+    const routeLineColor = '#F5C518';
+    const carBg = 'linear-gradient(145deg,#15181F,#0B0C0E)';
+    const carBorderColor = '#F5C518';
+    const viRingBorderColor = 'rgba(245, 197, 24, 0.4)';
+    const headerGradColors = ['rgba(11,12,14,0.95)', 'rgba(11,12,14,0)'];
 
     const destinationText = bookingMeta?.recipientAddress || intentData?.location || 'Islamabad, Pakistan';
     const initialCountdownVal = useRef(getInitialCountdown()).current;
@@ -213,7 +209,7 @@ export default function TrackingScreen({ route, navigation }) {
         
         .user-icon { 
             font-size: 24px; 
-            text-shadow: 0 0 15px #7C3AED;
+            text-shadow: 0 0 15px #F5C518;
             animation: pulse 2s infinite;
         }
         
@@ -279,7 +275,7 @@ export default function TrackingScreen({ route, navigation }) {
             L.marker([lat, lng], { icon: userIcon }).addTo(map);
 
             // Professional pulsing car pin (CSS-only, no SVG conflicts)
-            const carHtml = '<div style="position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center"><div class="vi-ring"></div><div style="width:38px;height:38px;border-radius:50%;background:${carBg};border:2.5px solid ${carBorderColor};box-shadow:0 0 20px rgba(0,229,255,0.7),0 0 40px rgba(0,229,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px">&#x1F6FB;</div></div>';
+            const carHtml = '<div style="position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center"><div class="vi-ring"></div><div style="width:38px;height:38px;border-radius:50%;background:${carBg};border:2.5px solid ${carBorderColor};box-shadow:0 0 20px rgba(245,197,24,0.7),0 0 40px rgba(245,197,24,0.2);display:flex;align-items:center;justify-content:center;font-size:20px">&#x1F6FB;</div></div>';
             const vehicleIcon = L.divIcon({ html: carHtml, className: '', iconSize: [52, 52], iconAnchor: [26, 26] });
             const vehicle = L.marker(routeCoords[0], { icon: vehicleIcon }).addTo(map);
 
@@ -326,7 +322,7 @@ export default function TrackingScreen({ route, navigation }) {
         Animated.sequence([
             Animated.spring(notificationAnim, { toValue: Platform.OS === 'android' ? 56 : 24, useNativeDriver: true }),
             Animated.delay(4500),
-            Animated.timing(notificationAnim, { toValue: -140, duration: 300, useNativeDriver: true })
+            Animated.timing(notificationAnim, { toValue: -140, duration: 300, easing: Easing.out(Easing.cubic), useNativeDriver: true })
         ]).start(() => setShowNotification(false));
 
         // Cross-platform push notification (expo-notifications on native, Web API on browser)
@@ -341,15 +337,16 @@ export default function TrackingScreen({ route, navigation }) {
         const timers = STATUSES.slice(0, -1).map((s, i) => {
             cum += s.ms;
             return setTimeout(() => {
-                Animated.timing(statusFade, { toValue: 0, duration: 180, useNativeDriver: true }).start(() => {
+                Animated.timing(statusFade, { toValue: 0, duration: 180, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start(() => {
                     setStatusIdx(i + 1);
                     updateStatus(bookingId, STATUSES[i + 1].key);
-                    Animated.timing(statusFade, { toValue: 1, duration: 180, useNativeDriver: true }).start();
+                    Animated.timing(statusFade, { toValue: 1, duration: 180, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
                 });
                 if (i + 1 === 1) {
                     // Start vehicle animation along route
                     Animated.timing(progress, {
                         toValue: 1, duration: STATUSES[1].ms - 600,
+                        easing: Easing.out(Easing.cubic),
                         useNativeDriver: false,
                     }).start();
                 }
@@ -362,11 +359,10 @@ export default function TrackingScreen({ route, navigation }) {
     };
 
     useEffect(() => {
-        Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }).start();
-        // Pulsing destination marker
+        Animated.timing(fadeIn, { toValue: 1, duration: 500, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
         Animated.loop(Animated.sequence([
-            Animated.timing(pulseScale, { toValue: 1.7, duration: 900, useNativeDriver: true }),
-            Animated.timing(pulseScale, { toValue: 1, duration: 900, useNativeDriver: true }),
+            Animated.timing(pulseScale, { toValue: 1.7, duration: 900, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+            Animated.timing(pulseScale, { toValue: 1, duration: 900, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
         ])).start();
 
         let timers = [];
@@ -517,7 +513,7 @@ export default function TrackingScreen({ route, navigation }) {
                     <View style={styles.scheduledBanner}>
                         <Text style={styles.scheduledTitle}>📅 Booking Scheduled</Text>
                         <Text style={styles.scheduledText}>
-                            Allocated slot: <Text style={{fontWeight:'700', color: isDarkMode ? '#00E5FF' : '#0284C7'}}>{bookingMeta.timeSlot}</Text>
+                            Allocated slot: <Text style={{fontWeight:'700', color: T.accent1}}>{bookingMeta.timeSlot}</Text>
                         </Text>
                         <Text style={styles.scheduledCountdown}>
                             Starting automatically in <Text style={{color:'#D4AF37', fontWeight:'800'}}>{formatCountdown(countdown)}</Text>
@@ -558,11 +554,11 @@ export default function TrackingScreen({ route, navigation }) {
                                         <View style={[
                                             styles.miniStepCircle, 
                                             done && { backgroundColor: '#22C55E' }, 
-                                            active && { backgroundColor: '#1A6BFF', borderColor: 'rgba(26,107,255,0.4)', borderWidth: 3 }
+                                            active && { backgroundColor: T.accent1, borderColor: 'rgba(245,197,24,0.4)', borderWidth: 3 }
                                         ]}>
                                             {done ? <Text style={styles.miniStepCheck}>✓</Text> : <Text style={styles.miniStepIcon}>{s.icon}</Text>}
                                         </View>
-                                        <Text style={[styles.miniStepLabel, active && { color: '#1A6BFF', fontWeight: '700' }]}>{s.label}</Text>
+                                        <Text style={[styles.miniStepLabel, active && { color: T.accent1, fontWeight: '700' }]}>{s.label}</Text>
                                     </View>
                                 );
                             })}
@@ -570,7 +566,7 @@ export default function TrackingScreen({ route, navigation }) {
 
                         {/* Provider Card */}
                         <View style={styles.providerCard}>
-                            <View style={[styles.providerAvatar, { backgroundColor: '#1A6BFF' }]}>
+                            <View style={[styles.providerAvatar, { backgroundColor: T.accent1 }]}>
                                 <Text style={styles.providerAvatarText}>{(providerData?.provider_name ?? 'P')[0]}</Text>
                             </View>
                             <View style={{ flex: 1 }}>
@@ -583,7 +579,7 @@ export default function TrackingScreen({ route, navigation }) {
                                 </View>
                                 <View style={{ height: 1, backgroundColor: T.border, marginVertical: 8 }} />
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Text style={{ color: '#00E5FF', fontSize: 13, fontWeight: '600' }}>
+                                    <Text style={{ color: T.accent1, fontSize: 13, fontWeight: '600' }}>
                                         📞 {providerData?.phone_number ?? '0312-3456789'}
                                     </Text>
                                     <Text style={{ color: T.sub, fontSize: 11, fontWeight: '500' }}>
@@ -675,14 +671,14 @@ export default function TrackingScreen({ route, navigation }) {
                                         key={r}
                                         style={[
                                             styles.reasonOption,
-                                            { borderColor: selected ? '#38BDF8' : T.border, backgroundColor: selected ? 'rgba(56, 189, 248, 0.08)' : 'transparent' }
+                                            { borderColor: selected ? T.accent1 : T.border, backgroundColor: selected ? 'rgba(245, 197, 24, 0.08)' : 'transparent' }
                                         ]}
                                         onPress={() => {
                                             setCancelReason(r);
                                             if (r !== 'Other') setCustomReason('');
                                         }}
                                     >
-                                        <Text style={[styles.reasonText, { color: selected ? '#38BDF8' : T.textLight }]}>{r}</Text>
+                                        <Text style={[styles.reasonText, { color: selected ? T.accent1 : T.textLight }]}>{r}</Text>
                                     </TouchableOpacity>
                                 );
                             })}
@@ -726,55 +722,37 @@ const makeStyles = (T, isDarkMode) => StyleSheet.create({
     // Map Background
     mapWrapper: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#0A0B18',
+        backgroundColor: '#0B0C0E',
     },
-
-    // Header Overlay
-    header: { 
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 10,
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        paddingHorizontal: T.sp5, 
-        paddingVertical: T.sp4, 
-        paddingTop: Platform.OS === 'android' ? 48 : T.sp5 
+    etaBadge: {
+        backgroundColor: 'rgba(245, 197, 24, 0.08)',
+        borderRadius: T.r2,
+        paddingHorizontal: T.sp3,
+        paddingVertical: T.sp2,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(245, 197, 24, 0.16)',
+        minWidth: 52
     },
-    headerCenter: { flex: 1, alignItems: 'center' },
-    headerTitle: { ...T.fH3, color: T.textLight, fontWeight: '700' },
-    headerStatus: { ...T.fCaption, fontWeight: '600', marginTop: 2 },
-    etaBadge: { 
-        backgroundColor: isDarkMode ? 'rgba(26,107,255,0.18)' : 'rgba(2, 132, 199, 0.1)', 
-        borderRadius: T.r2, 
-        paddingHorizontal: T.sp3, 
-        paddingVertical: T.sp2, 
-        alignItems: 'center', 
-        borderWidth: 1, 
-        borderColor: isDarkMode ? 'rgba(26,107,255,0.4)' : 'rgba(2, 132, 199, 0.3)', 
-        minWidth: 52 
-    },
-    etaNum: { color: isDarkMode ? '#00E5FF' : '#0284C7', fontSize: 20, fontWeight: '800' },
-    etaLabel: { color: isDarkMode ? '#00E5FF' : '#0284C7', fontSize: 10, fontWeight: '600' },
+    etaNum: { color: T.accent1, fontSize: 20, fontWeight: '800' },
+    etaLabel: { color: T.accent1, fontSize: 10, fontWeight: '600' },
     headerRight: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: T.sp2,
     },
     logsBtn: {
-        backgroundColor: isDarkMode ? 'rgba(0, 229, 255, 0.08)' : 'rgba(2, 132, 199, 0.08)',
+        backgroundColor: 'rgba(245, 197, 24, 0.08)',
         borderRadius: T.r2,
         paddingHorizontal: 12,
         height: 44,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: isDarkMode ? 'rgba(0, 229, 255, 0.35)' : 'rgba(2, 132, 199, 0.35)',
+        borderColor: 'rgba(245, 197, 24, 0.35)',
     },
     logsBtnText: {
-        color: isDarkMode ? '#00E5FF' : '#0284C7',
+        color: T.accent1,
         fontSize: 16,
         fontWeight: 'bold',
     },
@@ -833,20 +811,20 @@ const makeStyles = (T, isDarkMode) => StyleSheet.create({
     providerAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
     providerAvatarText: { color: '#fff', fontSize: 18, fontWeight: '800' },
     providerName: { ...T.fH3, color: T.textLight },
-    providerService: { color: '#1A6BFF', ...T.fCaption, fontWeight: '600', marginBottom: 2 },
+    providerService: { color: T.accent1, ...T.fCaption, fontWeight: '600', marginBottom: 2 },
     providerMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: T.sp2 },
     metaItem: { color: T.sub, ...T.fCaption },
 
     contactCard: {
-        backgroundColor: 'rgba(56, 189, 248, 0.05)',
+        backgroundColor: 'rgba(245, 197, 24, 0.04)',
         borderRadius: T.r3,
         padding: T.sp3,
         borderWidth: 1,
-        borderColor: 'rgba(56, 189, 248, 0.2)',
+        borderColor: 'rgba(245, 197, 24, 0.16)',
         marginTop: T.sp3,
     },
     contactTitle: {
-        color: '#38BDF8',
+        color: T.accent1,
         fontSize: 12,
         fontWeight: '700',
         marginBottom: 6,
@@ -879,20 +857,19 @@ const makeStyles = (T, isDarkMode) => StyleSheet.create({
         top: Platform.OS === 'android' ? 120 : 100,
         left: 20,
         right: 20,
-        backgroundColor: isDarkMode ? 'rgba(30, 30, 56, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+        backgroundColor: T.card,
         borderRadius: T.r3,
         padding: T.sp4,
         borderWidth: 1,
-        borderColor: isDarkMode ? '#8B5CF6' : '#7C3AED',
+        borderColor: T.border,
         zIndex: 999,
         alignItems: 'center',
-        ...SHADOWS.card,
     },
-    scheduledTitle: { color: isDarkMode ? '#8B5CF6' : '#7C3AED', fontWeight: '800', fontSize: 16, marginBottom: 4 },
+    scheduledTitle: { color: T.accent1, fontWeight: '800', fontSize: 16, marginBottom: 4 },
     scheduledText: { color: T.textLight, fontSize: 13, marginBottom: 8, textAlign: 'center' },
     scheduledCountdown: { color: T.sub, fontSize: 12, marginBottom: 12, textAlign: 'center' },
     startNowBtn: {
-        backgroundColor: '#8B5CF6',
+        backgroundColor: T.accent1,
         borderRadius: T.r2,
         paddingHorizontal: T.sp4,
         paddingVertical: T.sp2,
@@ -904,17 +881,17 @@ const makeStyles = (T, isDarkMode) => StyleSheet.create({
         position: 'absolute',
         left: 16,
         right: 16,
-        backgroundColor: '#1E1E38',
+        backgroundColor: T.elevated,
         borderRadius: T.r3,
         padding: T.sp4,
         borderWidth: 1,
-        borderColor: '#00E5FF',
+        borderColor: T.accent1,
         zIndex: 9999,
         ...SHADOWS.card,
     },
     notificationHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
     notificationIcon: { fontSize: 18 },
-    notificationTitle: { color: '#00E5FF', fontWeight: '800', fontSize: 14 },
+    notificationTitle: { color: T.accent1, fontWeight: '800', fontSize: 14 },
     notificationText: { color: T.textLight, fontSize: 12, lineHeight: 16 },
 
     backHomeBtn: {
@@ -926,18 +903,18 @@ const makeStyles = (T, isDarkMode) => StyleSheet.create({
         paddingVertical: 14,
         alignItems: 'center',
     },
-    backHomeBtnText: { color: '#00E5FF', fontSize: 14, fontWeight: '700' },
+    backHomeBtnText: { color: T.accent1, fontSize: 14, fontWeight: '700' },
     smsConfirmationPill: {
-        backgroundColor: 'rgba(0,229,255,0.08)',
+        backgroundColor: 'rgba(245, 197, 24, 0.08)',
         borderRadius: 10,
         padding: 10,
         marginTop: 10,
         borderWidth: 1,
-        borderColor: 'rgba(0,229,255,0.2)',
+        borderColor: 'rgba(245, 197, 24, 0.2)',
         alignItems: 'center',
     },
     smsConfirmationText: {
-        color: '#00E5FF',
+        color: T.accent1,
         fontSize: 12,
         fontWeight: '600',
     },

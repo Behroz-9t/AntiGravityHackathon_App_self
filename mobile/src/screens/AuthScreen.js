@@ -73,10 +73,10 @@ export default function AuthScreen() {
                     <View style={styles.logoContainer}>
                         <View style={styles.logoIconWrap}>
                             <LinearGradient
-                                colors={['rgba(56,189,248,0.15)', 'rgba(212,175,55,0.08)']}
+                                colors={['rgba(245,197,24,0.15)', 'rgba(212,175,55,0.08)']}
                                 style={styles.logoGrad}
                             >
-                                <Wrench size={34} color="#38BDF8" strokeWidth={1.8} />
+                                <Wrench size={34} color={T.accent1} strokeWidth={1.8} />
                             </LinearGradient>
                             <View style={styles.logoGlow} />
                         </View>
@@ -93,7 +93,7 @@ export default function AuthScreen() {
                                 onPress={() => { setIsLogin(true); setErrorMsg(''); }}
                             >
                                 <View style={styles.tabInner}>
-                                    <LogIn size={14} color={isLogin ? '#38BDF8' : T.sub} />
+                                    <LogIn size={14} color={isLogin ? T.accent1 : T.sub} />
                                     <Text style={[styles.tabText, isLogin && styles.activeTabText]}>Login</Text>
                                 </View>
                             </TouchableOpacity>
@@ -102,7 +102,7 @@ export default function AuthScreen() {
                                 onPress={() => { setIsLogin(false); setErrorMsg(''); }}
                             >
                                 <View style={styles.tabInner}>
-                                    <UserPlus size={14} color={!isLogin ? '#38BDF8' : T.sub} />
+                                    <UserPlus size={14} color={!isLogin ? T.accent1 : T.sub} />
                                     <Text style={[styles.tabText, !isLogin && styles.activeTabText]}>Register</Text>
                                 </View>
                             </TouchableOpacity>
@@ -158,12 +158,12 @@ export default function AuthScreen() {
 
                         <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
                             <LinearGradient
-                                colors={['#38BDF8', '#0284C7']}
+                                colors={G.brand}
                                 style={styles.submitGrad}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
                             >
-                                <Text style={styles.submitText}>
+                                <Text style={[styles.submitText, { color: '#0B0C0E' }]}>
                                     {isLogin ? 'Login Now' : 'Create Account'}
                                 </Text>
                             </LinearGradient>
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
         height: 80,
         borderRadius: 24,
         borderWidth: 1,
-        borderColor: 'rgba(56,189,248,0.25)',
+        borderColor: 'rgba(245,197,24,0.25)',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
         width: 90,
         height: 90,
         borderRadius: 28,
-        backgroundColor: 'rgba(56, 189, 248, 0.06)',
+        backgroundColor: 'rgba(245, 197, 24, 0.06)',
         zIndex: -1,
     },
     logoTitle: {
@@ -253,11 +253,11 @@ const styles = StyleSheet.create({
         letterSpacing: 0.3,
     },
     card: {
-        backgroundColor: 'rgba(18, 20, 23, 0.95)',
+        backgroundColor: T.card,
         borderRadius: 24,
         padding: 24,
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.08)',
+        borderColor: T.border,
         ...SHADOWS.card,
     },
     tabContainer: {
@@ -280,9 +280,9 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     activeTab: {
-        backgroundColor: 'rgba(56,189,248,0.10)',
+        backgroundColor: 'rgba(245,197,24,0.08)',
         borderWidth: 1,
-        borderColor: 'rgba(56,189,248,0.20)',
+        borderColor: 'rgba(245,197,24,0.16)',
     },
     tabText: {
         color: '#94A3B8',
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     activeTabText: {
-        color: '#38BDF8',
+        color: T.accent1,
     },
     errorBanner: {
         backgroundColor: 'rgba(239,68,68,0.08)',

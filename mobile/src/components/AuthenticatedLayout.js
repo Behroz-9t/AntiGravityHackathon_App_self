@@ -31,8 +31,8 @@ export default function AuthenticatedLayout({ children }) {
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
                         {isOpen
-                            ? <X size={20} color="#38BDF8" strokeWidth={2.5} />
-                            : <Menu size={20} color="#38BDF8" strokeWidth={2.5} />
+                            ? <X size={20} color={T.accent1} strokeWidth={2.5} />
+                            : <Menu size={20} color={T.accent1} strokeWidth={2.5} />
                         }
                     </TouchableOpacity>
 
@@ -67,7 +67,7 @@ export default function AuthenticatedLayout({ children }) {
 }
 
 const makeStyles = (T) => {
-    const isDark = T.bg === '#0A0B0D';
+    const isDark = true;
     return StyleSheet.create({
         /* ── Mobile ─────────────────────────────────────────────── */
         mobileRoot: {
@@ -75,7 +75,7 @@ const makeStyles = (T) => {
             backgroundColor: T.bg,
         },
         mobileHeader: {
-            backgroundColor: isDark ? 'rgba(14, 16, 20, 0.97)' : '#FFFFFF',
+            backgroundColor: 'rgba(14, 16, 20, 0.97)',
             borderBottomWidth: 1,
             borderBottomColor: T.border,
             flexDirection: 'row',
@@ -87,7 +87,7 @@ const makeStyles = (T) => {
             // Shadow for depth
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: isDark ? 0.3 : 0.08,
+            shadowOpacity: 0.3,
             shadowRadius: 8,
             elevation: 8,
         },
@@ -97,9 +97,9 @@ const makeStyles = (T) => {
             justifyContent: 'center',
             alignItems: 'center',
             borderRadius: 12,
-            backgroundColor: isDark ? 'rgba(56, 189, 248, 0.08)' : 'rgba(56, 189, 248, 0.05)',
+            backgroundColor: 'rgba(245, 197, 24, 0.08)',
             borderWidth: 1,
-            borderColor: isDark ? 'rgba(56, 189, 248, 0.18)' : 'rgba(56, 189, 248, 0.25)',
+            borderColor: 'rgba(245, 197, 24, 0.18)',
         },
         headerTitle: {
             color: T.textLight,

@@ -81,7 +81,7 @@ export default function SidePanel() {
                 onPress={() => switchTab('workflows')}
             >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Bot size={16} color={activeTab === 'workflows' ? '#38BDF8' : T.sub} />
+                    <Bot size={16} color={activeTab === 'workflows' ? T.accent1 : T.sub} />
                     <Text style={[styles.tabText, activeTab === 'workflows' && styles.tabTextActive]}>
                         Workflows
                     </Text>
@@ -93,7 +93,7 @@ export default function SidePanel() {
                 onPress={() => switchTab('bookings')}
             >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Calendar size={16} color={activeTab === 'bookings' ? '#38BDF8' : T.sub} />
+                    <Calendar size={16} color={activeTab === 'bookings' ? T.accent1 : T.sub} />
                     <Text style={[styles.tabText, activeTab === 'bookings' && styles.tabTextActive]}>
                         Bookings
                     </Text>
@@ -112,7 +112,7 @@ export default function SidePanel() {
                         <View key={booking.id} style={styles.bookingCard}>
                             <View style={styles.bookingHeader}>
                                 <Text style={styles.bookingService} numberOfLines={1}>{booking.service}</Text>
-                                <Text style={[styles.bookingStatus, { color: '#00E5FF', fontWeight: '800' }]}>
+                                <Text style={[styles.bookingStatus, { color: T.accent1, fontWeight: '800' }]}>
                                     ● {booking.status}
                                 </Text>
                             </View>
@@ -139,7 +139,7 @@ export default function SidePanel() {
                                         }
                                     }}
                                 >
-                                    <MessageCircle size={12} color="#38BDF8" strokeWidth={2} />
+                                    <MessageCircle size={12} color={T.accent1} strokeWidth={2} />
                                     <Text style={[styles.chatBtnText, { fontSize: 10 }]}>Talk to AI</Text>
                                 </TouchableOpacity>
 
@@ -267,7 +267,7 @@ export default function SidePanel() {
                                     <View style={styles.workflowHeader}>
                                         <Text style={styles.workflowService}>{booking.service}</Text>
                                         <Text style={[styles.workflowStatusText, {
-                                            color: booking.status === 'Completed' ? '#10B981' : '#38BDF8'
+                                            color: booking.status === 'Completed' ? '#10B981' : T.accent1
                                         }]}>
                                             ● {booking.status}
                                         </Text>
@@ -308,7 +308,7 @@ export default function SidePanel() {
                                         }}
                                     >
                                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                                            <Download size={13} color="#38BDF8" />
+                                            <Download size={13} color={T.accent1} />
                                             <Text style={styles.sideDownloadBtnText}>Download Technical Logs</Text>
                                         </View>
                                     </TouchableOpacity>
@@ -358,23 +358,6 @@ export default function SidePanel() {
         </ScrollView>
     );
 
-    const renderThemeToggle = () => (
-        <View style={[styles.themeToggleRow, { borderTopWidth: 1, borderTopColor: T.border }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontSize: 16 }}>{isDarkMode ? '🌙' : '☀️'}</Text>
-                <Text style={[styles.themeToggleText, { color: T.textLight, fontSize: 13, fontWeight: '600' }]}>
-                    {isDarkMode ? 'Dark Mode' : 'Light Mode'}
-                </Text>
-            </View>
-            <Switch
-                value={!isDarkMode}
-                onValueChange={() => toggleTheme()}
-                trackColor={{ false: '#475569', true: '#38BDF8' }}
-                thumbColor={isDarkMode ? '#94A3B8' : '#0284C7'}
-            />
-        </View>
-    );
-
     const isMobile = screenWidth < MOBILE_BREAKPOINT;
 
     const translateX = progress.interpolate({
@@ -418,7 +401,6 @@ export default function SidePanel() {
                         {renderProfileSection()}
                         {renderTabBar()}
                         {activeTab === 'bookings' ? renderBookingsTab() : renderWorkflowsTab()}
-                        {renderThemeToggle()}
                     </SafeAreaView>
                 </Animated.View>
             </>
@@ -432,7 +414,6 @@ export default function SidePanel() {
                 {renderProfileSection()}
                 {renderTabBar()}
                 {activeTab === 'bookings' ? renderBookingsTab() : renderWorkflowsTab()}
-                {renderThemeToggle()}
             </SafeAreaView>
         </View>
     );
@@ -495,17 +476,17 @@ const makeStyles = (T) => StyleSheet.create({
         width: 72,
         height: 72,
         borderRadius: 36,
-        backgroundColor: 'rgba(56, 189, 248, 0.10)',
+        backgroundColor: 'rgba(245, 197, 24, 0.08)',
         borderWidth: 1,
-        borderColor: 'rgba(56, 189, 248, 0.20)',
+        borderColor: 'rgba(245, 197, 24, 0.16)',
     },
     avatarPlaceholder: {
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#0A0B0D',
+        backgroundColor: '#0B0C0E',
         borderWidth: 2,
-        borderColor: '#38BDF8',
+        borderColor: T.accent1,
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
@@ -528,7 +509,7 @@ const makeStyles = (T) => StyleSheet.create({
     avatarText: {
         fontSize: 24,
         fontWeight: '700',
-        color: '#38BDF8',
+        color: T.accent1,
     },
     userName: {
         fontSize: 16,
@@ -579,7 +560,7 @@ const makeStyles = (T) => StyleSheet.create({
     },
     tabActive: {
         borderBottomWidth: 2,
-        borderBottomColor: '#38BDF8',
+        borderBottomColor: T.accent1,
     },
     tabText: {
         fontSize: 12,
@@ -587,7 +568,7 @@ const makeStyles = (T) => StyleSheet.create({
         color: T.sub,
     },
     tabTextActive: {
-        color: '#38BDF8',
+        color: T.accent1,
         fontWeight: '700',
     },
     tabIndicator: {
@@ -595,7 +576,7 @@ const makeStyles = (T) => StyleSheet.create({
         bottom: -1,
         width: '80%',
         height: 2,
-        backgroundColor: '#38BDF8',
+        backgroundColor: T.accent1,
     },
 
     // Tab Content
@@ -655,9 +636,9 @@ const makeStyles = (T) => StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        backgroundColor: 'rgba(56,189,248,0.08)',
+        backgroundColor: 'rgba(245,197,24,0.08)',
         borderWidth: 1,
-        borderColor: 'rgba(56,189,248,0.2)',
+        borderColor: 'rgba(245,197,24,0.2)',
         borderRadius: 8,
         paddingHorizontal: 10,
         paddingVertical: 6,
@@ -668,7 +649,7 @@ const makeStyles = (T) => StyleSheet.create({
         borderColor: 'rgba(148,163,184,0.15)',
     },
     chatBtnText: {
-        color: '#38BDF8',
+        color: T.accent1,
         fontSize: 11,
         fontWeight: '700',
     },
@@ -688,7 +669,7 @@ const makeStyles = (T) => StyleSheet.create({
         borderColor: T.border,
     },
     workflowCardExpanded: {
-        borderColor: 'rgba(56, 189, 248, 0.25)',
+        borderColor: 'rgba(245, 197, 24, 0.25)',
     },
     workflowHeaderTouch: {
         flexDirection: 'row',
@@ -735,18 +716,18 @@ const makeStyles = (T) => StyleSheet.create({
         marginBottom: 12,
     },
     sideDownloadBtn: {
-        backgroundColor: 'rgba(56, 189, 248, 0.08)',
+        backgroundColor: 'rgba(245, 197, 24, 0.08)',
         borderRadius: T.r2,
         paddingVertical: 10,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(56, 189, 248, 0.20)',
+        borderColor: 'rgba(245, 197, 24, 0.20)',
         marginBottom: 16,
     },
     sideDownloadBtnText: {
         fontSize: 11,
         fontWeight: '700',
-        color: '#38BDF8',
+        color: T.accent1,
     },
     timelineTitle: {
         fontSize: 10,

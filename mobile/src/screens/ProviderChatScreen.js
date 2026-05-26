@@ -414,9 +414,9 @@ export default function ProviderChatScreen({ route, navigation }) {
 
                 {!isOngoingFlow && (
                     <TouchableOpacity style={styles.trackBtn} onPress={goToTracking} activeOpacity={0.85}>
-                        <LinearGradient colors={['#38BDF8', '#0284C7']} style={styles.trackBtnGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-                            <Text style={styles.trackBtnText}>Track</Text>
-                            <ChevronRight size={14} color="#fff" strokeWidth={2.5} />
+                        <LinearGradient colors={G.brand} style={styles.trackBtnGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+                            <Text style={[styles.trackBtnText, { color: '#0B0C0E' }]}>Track</Text>
+                            <ChevronRight size={14} color="#0B0C0E" strokeWidth={2.5} />
                         </LinearGradient>
                     </TouchableOpacity>
                 )}
@@ -425,12 +425,12 @@ export default function ProviderChatScreen({ route, navigation }) {
             {/* ── Info strip ── */}
             <View style={styles.infoStrip}>
                 <View style={styles.infoChip}>
-                    <Clock size={11} color="#38BDF8" />
+                    <Clock size={11} color={T.accent1} />
                     <Text style={styles.infoChipText}>ETA: {eta}</Text>
                 </View>
                 {!!location && (
                     <View style={styles.infoChip}>
-                        <MapPin size={11} color="#38BDF8" />
+                        <MapPin size={11} color={T.accent1} />
                         <Text style={styles.infoChipText}>{location}</Text>
                     </View>
                 )}
@@ -518,13 +518,13 @@ export default function ProviderChatScreen({ route, navigation }) {
                     activeOpacity={0.9}
                 >
                     <LinearGradient
-                        colors={['#38BDF8', '#0284C7']}
+                        colors={G.brand}
                         style={styles.proceedBtnGrad}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
                     >
-                        <Text style={styles.proceedBtnText}>Proceed to Live Tracking</Text>
-                        <ChevronRight size={18} color="#fff" strokeWidth={2.5} />
+                        <Text style={[styles.proceedBtnText, { color: '#0B0C0E' }]}>Proceed to Live Tracking</Text>
+                        <ChevronRight size={18} color="#0B0C0E" strokeWidth={2.5} />
                     </LinearGradient>
                 </TouchableOpacity>
             )}
@@ -555,10 +555,10 @@ const makeStyles = (T) => {
         headerCenter: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
         headerAvatar: {
             width: 40, height: 40, borderRadius: 20,
-            borderWidth: 1.5, borderColor: isDark ? 'rgba(56,189,248,0.35)' : 'rgba(56,189,248,0.2)',
+            borderWidth: 1.5, borderColor: 'rgba(245,197,24,0.35)',
             justifyContent: 'center', alignItems: 'center',
         },
-        headerAvatarText: { color: '#38BDF8', fontSize: 17, fontWeight: '800' },
+        headerAvatarText: { color: T.accent1, fontSize: 17, fontWeight: '800' },
         headerInfo: { flex: 1 },
         headerName: { color: T.textLight, fontSize: 15, fontWeight: '700' },
         headerMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
@@ -582,8 +582,8 @@ const makeStyles = (T) => {
         },
         infoChip: {
             flexDirection: 'row', alignItems: 'center', gap: 5,
-            backgroundColor: isDark ? 'rgba(56,189,248,0.07)' : 'rgba(56,189,248,0.12)',
-            borderWidth: 1, borderColor: isDark ? 'rgba(56,189,248,0.15)' : 'rgba(56,189,248,0.25)',
+            backgroundColor: 'rgba(245,197,24,0.08)',
+            borderWidth: 1, borderColor: 'rgba(245,197,24,0.16)',
             borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4,
         },
         chipGroq: { 
@@ -594,7 +594,7 @@ const makeStyles = (T) => {
             backgroundColor: isDark ? 'rgba(167,139,250,0.07)' : 'rgba(167,139,250,0.12)', 
             borderColor: isDark ? 'rgba(167,139,250,0.2)' : 'rgba(167,139,250,0.25)' 
         },
-        infoChipText: { color: '#38BDF8', fontSize: 11, fontWeight: '600' },
+        infoChipText: { color: T.accent1, fontSize: 11, fontWeight: '600' },
         errorBanner: { color: T.error, fontSize: 11, paddingHorizontal: 4, alignSelf: 'center' },
 
         /* Messages */
@@ -607,20 +607,20 @@ const makeStyles = (T) => {
         bubbleRowProvider: { justifyContent: 'flex-start' },
         providerAvatar: {
             width: 30, height: 30, borderRadius: 15,
-            borderWidth: 1, borderColor: isDark ? 'rgba(56,189,248,0.3)' : 'rgba(56,189,248,0.2)',
+            borderWidth: 1, borderColor: 'rgba(245,197,24,0.2)',
             justifyContent: 'center', alignItems: 'center', flexShrink: 0,
         },
-        providerAvatarText: { color: '#38BDF8', fontSize: 12, fontWeight: '800' },
+        providerAvatarText: { color: T.accent1, fontSize: 12, fontWeight: '800' },
 
         bubble: { maxWidth: '75%', borderRadius: 18, paddingHorizontal: 14, paddingVertical: 10 },
-        bubbleUser: { backgroundColor: isDark ? '#0369A1' : '#0284C7', borderBottomRightRadius: 4 },
+        bubbleUser: { backgroundColor: T.accent1, borderBottomRightRadius: 4 },
         bubbleProvider: {
             backgroundColor: T.elevated,
             borderWidth: 1, borderColor: T.border,
             borderBottomLeftRadius: 4,
         },
         bubbleText: { fontSize: 14, lineHeight: 21 },
-        bubbleTextUser: { color: '#FFFFFF', fontWeight: '500' },
+        bubbleTextUser: { color: '#0B0C0E', fontWeight: '600' },
         bubbleTextProvider: { color: T.textLight },
         bubbleTime: { color: T.sub, fontSize: 10, marginTop: 4, alignSelf: 'flex-end', opacity: 0.7 },
 
@@ -633,7 +633,7 @@ const makeStyles = (T) => {
             paddingHorizontal: 16, paddingVertical: 14,
         },
         typingDots: { flexDirection: 'row', gap: 5, alignItems: 'center' },
-        typingDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#38BDF8' },
+        typingDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: T.accent1 },
 
         /* Input */
         inputBar: {
@@ -650,9 +650,9 @@ const makeStyles = (T) => {
         },
         sendBtn: {
             width: 44, height: 44, borderRadius: 14,
-            backgroundColor: isDark ? '#0369A1' : '#0284C7', justifyContent: 'center', alignItems: 'center', marginBottom: 2,
+            backgroundColor: T.accent1, justifyContent: 'center', alignItems: 'center', marginBottom: 2,
         },
-        sendBtnDisabled: { backgroundColor: isDark ? 'rgba(3,105,161,0.3)' : 'rgba(2,132,199,0.3)' },
+        sendBtnDisabled: { backgroundColor: 'rgba(245, 197, 24, 0.2)' },
 
         /* Proceed CTA */
         proceedBtn: { marginHorizontal: 14, marginTop: 6, borderRadius: 16, overflow: 'hidden' },

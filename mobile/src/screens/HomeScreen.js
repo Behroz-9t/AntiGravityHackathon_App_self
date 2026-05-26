@@ -4,26 +4,27 @@ import {
     ActivityIndicator, ScrollView, Animated, Platform, SafeAreaView, KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { orchestrateRequest, getUserLocation } from '../api';
+import { orchestrateRequest, getUserLocation, getReadableAddress } from '../api';
 import { useBookings } from '../BookingContext';
 import { getTheme, getGradients } from '../theme';
+import * as Location from 'expo-location';
 import { 
     Wind, Droplet, Zap, Sparkles, Hammer, Bug, MapPin, Users, Phone,
     Wrench, Mic, Bot, Car, Clock, History, User, Info, X
 } from 'lucide-react-native';
 
 const SUGGESTIONS = [
-    { Icon: Wind,     iconColor: '#38BDF8', label: 'AC Repair',    query: 'AC kharab hai theek karo' },
-    { Icon: Droplet,  iconColor: '#38BDF8', label: 'Plumber',      query: 'mujhy plumber chahiye' },
-    { Icon: Zap,      iconColor: '#D4AF37', label: 'Electrician',  query: 'bijli ka masla hai electrician chahiye' },
-    { Icon: Sparkles, iconColor: '#10B981', label: 'Cleaning',     query: 'ghar ki safai karni hai' },
-    { Icon: Hammer,   iconColor: '#F59E0B', label: 'Carpenter',    query: 'furniture theek karna hai' },
-    { Icon: Bug,      iconColor: '#EF4444', label: 'Pest Control', query: 'keeray makoray ka spray chahiye' },
+    { Icon: Wind,     iconColor: '#F5C518', label: 'AC Repair',    query: 'AC kharab hai theek karo' },
+    { Icon: Droplet,  iconColor: '#F5C518', label: 'Plumber',      query: 'mujhy plumber chahiye' },
+    { Icon: Zap,      iconColor: '#F5C518', label: 'Electrician',  query: 'bijli ka masla hai electrician chahiye' },
+    { Icon: Sparkles, iconColor: '#F5C518', label: 'Cleaning',     query: 'ghar ki safai karni hai' },
+    { Icon: Hammer,   iconColor: '#F5C518', label: 'Carpenter',    query: 'furniture theek karna hai' },
+    { Icon: Bug,      iconColor: '#F5C518', label: 'Pest Control', query: 'keeray makoray ka spray chahiye' },
 ];
 
 const C = {
-    bg: '#0A0B0D', card: 'rgba(18, 20, 23, 0.95)', border: 'rgba(255, 255, 255, 0.08)',
-    text: '#F8FAFC', sub: '#94A3B8', primary: '#38BDF8', gold: '#D4AF37',
+    bg: '#0B0C0E', card: '#15181F', border: 'rgba(245, 197, 24, 0.08)',
+    text: '#F8FAFC', sub: '#94A3B8', primary: '#F5C518', gold: '#F5C518',
 };
 
 function InputField({ label, icon, value, onChangeText, placeholder, keyboardType, multiline, maxLength }) {
@@ -89,17 +90,17 @@ function DropdownSelector({ label, icon, selectedValue, onValueChange, placehold
                             key={opt.value}
                             style={[
                                 styles.dropdownOption,
-                                selectedValue === opt.value && { backgroundColor: isDarkMode ? 'rgba(56,189,248,0.1)' : 'rgba(56,189,248,0.05)' }
+                                selectedValue === opt.value && { backgroundColor: 'rgba(245,197,24,0.08)' }
                             ]}
                             onPress={() => {
                                 onValueChange(opt.value);
                                 setIsOpen(false);
-                            }}
+                             }}
                         >
                             <Text style={[
                                 styles.dropdownOptionText, 
                                 { color: T.sub },
-                                selectedValue === opt.value && { color: '#38BDF8', fontWeight: '700' }
+                                selectedValue === opt.value && { color: T.accent1, fontWeight: '700' }
                             ]}>
                                 {opt.label}
                             </Text>
@@ -185,14 +186,56 @@ export default function HomeScreen({ navigation }) {
     const [locationStatus, setLocationStatus]   = useState('idle');
     const [errorMsg, setErrorMsg]               = useState('');
 
+    const [userLocationAddress, setUserLocationAddress] = useState('');
+    const [userCoords, setUserCoords] = useState(null);
+    const [locationLoading, setLocationLoading] = useState(false);
+
     const fadeAnim  = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(30)).current;
+
+    const initiateLocationFetch = async () => {
+        setLocationLoading(true);
+        setErrorMsg('');
+        try {
+            const servicesEnabled = await Location.hasServicesEnabledAsync();
+            if (!servicesEnabled) {
+                setErrorMsg('Location services are disabled. Please turn on GPS / Location Services.');
+                setLocationStatus('skipped');
+                setLocationLoading(false);
+                return;
+            }
+
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setErrorMsg('Location permission denied. Please enable permissions to find local services.');
+                setLocationStatus('skipped');
+                setLocationLoading(false);
+                return;
+            }
+
+            const coords = await getUserLocation();
+            if (coords) {
+                setUserCoords(coords);
+                setLocationStatus('ok');
+                const addr = await getReadableAddress(coords.lat, coords.lng);
+                setUserLocationAddress(addr);
+            } else {
+                setLocationStatus('skipped');
+            }
+        } catch (err) {
+            console.warn('Location initialization error:', err);
+            setLocationStatus('skipped');
+        } finally {
+            setLocationLoading(false);
+        }
+    };
 
     useEffect(() => {
         Animated.parallel([
             Animated.timing(fadeAnim,  { toValue: 1, duration: 700, useNativeDriver: true }),
             Animated.timing(slideAnim, { toValue: 0, duration: 700, useNativeDriver: true }),
         ]).start();
+        initiateLocationFetch();
     }, []);
 
     const handleSearch = async (overrideQuery) => {
@@ -241,12 +284,20 @@ export default function HomeScreen({ navigation }) {
             timeSlot: timeSlot.trim() || 'Immediate',
         };
 
-        let coords = null;
+        let coords = userCoords;
         if (mode === 'self') {
-            // Only fetch GPS when booking for yourself
-            setLocationStatus('fetching');
-            coords = await getUserLocation();
-            setLocationStatus(coords ? 'ok' : 'skipped');
+            if (!coords) {
+                setLocationStatus('fetching');
+                coords = await getUserLocation();
+                if (coords) {
+                    setUserCoords(coords);
+                    const addr = await getReadableAddress(coords.lat, coords.lng);
+                    setUserLocationAddress(addr);
+                }
+                setLocationStatus(coords ? 'ok' : 'skipped');
+            } else {
+                setLocationStatus('ok');
+            }
         }
 
         try {
@@ -278,10 +329,10 @@ export default function HomeScreen({ navigation }) {
                         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }], alignItems: 'center' }}>
                             <View style={styles.logoBadge}>
                                 <LinearGradient
-                                    colors={['rgba(56,189,248,0.18)', 'rgba(212,175,55,0.10)']}
+                                    colors={['rgba(245,197,24,0.18)', 'rgba(212,175,55,0.10)']}
                                     style={styles.logoBadgeGrad}
                                 >
-                                    <Wrench size={32} color="#38BDF8" strokeWidth={1.8} />
+                                    <Wrench size={32} color={T.accent1} strokeWidth={1.8} />
                                 </LinearGradient>
                                 <View style={styles.logoBadgeGlow} />
                             </View>
@@ -292,6 +343,28 @@ export default function HomeScreen({ navigation }) {
 
                     <View style={styles.content}>
 
+                        {/* Location Pill */}
+                        <TouchableOpacity
+                            style={[
+                                styles.locationPill,
+                                {
+                                    backgroundColor: 'rgba(245, 197, 24, 0.08)',
+                                    borderColor: 'rgba(245, 197, 24, 0.20)',
+                                }
+                            ]}
+                            onPress={initiateLocationFetch}
+                            activeOpacity={0.8}
+                        >
+                            {locationLoading ? (
+                                <ActivityIndicator size={12} color={T.accent1} style={{ marginRight: 6 }} />
+                            ) : (
+                                <MapPin size={14} color={T.accent1} style={{ marginRight: 6 }} />
+                            )}
+                            <Text style={[styles.locationPillText, { color: T.accent1 }]} numberOfLines={1}>
+                                {locationLoading ? 'Fetching location...' : (userLocationAddress || 'Unknown Location (Tap to retry)')}
+                            </Text>
+                        </TouchableOpacity>
+
                         {/* Mode Toggle */}
                         <View style={[styles.modeToggle, { backgroundColor: T.card, borderColor: T.border }]}>
                             <TouchableOpacity
@@ -299,8 +372,8 @@ export default function HomeScreen({ navigation }) {
                                 onPress={() => { setMode('self'); setErrorMsg(''); }}
                             >
                                 {mode === 'self'
-                                    ? <LinearGradient colors={['#38BDF8','#0284C7']} style={styles.modeBtnGrad} start={{x:0,y:0}} end={{x:1,y:0}}>
-                                        <MapPin size={14} color="#fff" />
+                                    ? <LinearGradient colors={G.brand} style={styles.modeBtnGrad} start={{x:0,y:0}} end={{x:1,y:0}}>
+                                        <MapPin size={14} color="#0B0C0E" />
                                         <Text style={styles.modeBtnTextActive}>For Myself</Text>
                                       </LinearGradient>
                                     : <View style={styles.modeBtnInner}><MapPin size={14} color={T.sub} /><Text style={[styles.modeBtnText, { color: T.sub }]}>For Myself</Text></View>
@@ -311,8 +384,8 @@ export default function HomeScreen({ navigation }) {
                                 onPress={() => { setMode('others'); setErrorMsg(''); }}
                             >
                                 {mode === 'others'
-                                    ? <LinearGradient colors={['#38BDF8','#0284C7']} style={styles.modeBtnGrad} start={{x:0,y:0}} end={{x:1,y:0}}>
-                                        <Users size={14} color="#fff" />
+                                    ? <LinearGradient colors={G.brand} style={styles.modeBtnGrad} start={{x:0,y:0}} end={{x:1,y:0}}>
+                                        <Users size={14} color="#0B0C0E" />
                                         <Text style={styles.modeBtnTextActive}>Book for Others</Text>
                                       </LinearGradient>
                                     : <View style={styles.modeBtnInner}><Users size={14} color={T.sub} /><Text style={[styles.modeBtnText, { color: T.sub }]}>Book for Others</Text></View>
@@ -344,7 +417,7 @@ export default function HomeScreen({ navigation }) {
                                                 style={[
                                                     styles.timeOptionBtn,
                                                     { backgroundColor: T.elevated, borderColor: T.border },
-                                                    timeOption === 'immediate' && { borderColor: '#38BDF8', backgroundColor: isDarkMode ? 'rgba(56,189,248,0.06)' : 'rgba(56,189,248,0.12)' },
+                                                    timeOption === 'immediate' && { borderColor: T.accent1, backgroundColor: 'rgba(245, 197, 24, 0.08)' },
                                                     isImmUnavailable && styles.timeOptionBtnDisabled
                                                 ]}
                                                 onPress={() => {
@@ -356,11 +429,11 @@ export default function HomeScreen({ navigation }) {
                                                 disabled={isImmUnavailable}
                                             >
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                                                    <Zap size={14} color={timeOption === 'immediate' ? '#38BDF8' : T.sub} />
+                                                    <Zap size={14} color={timeOption === 'immediate' ? T.accent1 : T.sub} />
                                                     <Text style={[
                                                         styles.timeOptionText,
                                                         { color: T.sub },
-                                                        timeOption === 'immediate' && { color: '#38BDF8', fontWeight: '700' },
+                                                        timeOption === 'immediate' && { color: T.accent1, fontWeight: '700' },
                                                         isImmUnavailable && styles.timeOptionTextDisabled
                                                     ]}>
                                                         Immediate {isImmUnavailable ? '(Unavailable)' : ''}
@@ -372,18 +445,18 @@ export default function HomeScreen({ navigation }) {
                                                 style={[
                                                     styles.timeOptionBtn,
                                                     { backgroundColor: T.elevated, borderColor: T.border },
-                                                    timeOption === 'later' && { borderColor: '#38BDF8', backgroundColor: isDarkMode ? 'rgba(56,189,248,0.06)' : 'rgba(56,189,248,0.12)' }
+                                                    timeOption === 'later' && { borderColor: T.accent1, backgroundColor: 'rgba(245, 197, 24, 0.08)' }
                                                 ]}
                                                 onPress={() => {
                                                     setShowSlotsModal(true);
                                                 }}
                                             >
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                                                    <Clock size={14} color={timeOption === 'later' ? '#38BDF8' : T.sub} />
+                                                    <Clock size={14} color={timeOption === 'later' ? T.accent1 : T.sub} />
                                                     <Text style={[
                                                         styles.timeOptionText,
                                                         { color: T.sub },
-                                                        timeOption === 'later' && { color: '#38BDF8', fontWeight: '700' }
+                                                        timeOption === 'later' && { color: T.accent1, fontWeight: '700' }
                                                     ]}>
                                                         Book for Later
                                                     </Text>
@@ -392,7 +465,7 @@ export default function HomeScreen({ navigation }) {
                                         </View>
 
                                         {timeOption === 'later' && (
-                                            <View style={[styles.selectedSlotDisplay, { backgroundColor: isDarkMode ? 'rgba(0,229,255,0.04)' : T.elevated, borderColor: T.border }]}>
+                                            <View style={[styles.selectedSlotDisplay, { backgroundColor: 'rgba(245, 197, 24, 0.04)', borderColor: T.border }]}>
                                                 <Text style={[styles.selectedSlotLabel, { color: T.sub }]}>Selected Slot:</Text>
                                                 <Text style={[styles.selectedSlotValue, { color: T.textLight }]}>{timeSlot}</Text>
                                                 <TouchableOpacity onPress={() => setShowSlotsModal(true)}>
@@ -401,8 +474,8 @@ export default function HomeScreen({ navigation }) {
                                             </View>
                                         )}
                                         {locationLabel ? (
-                                             <View style={[styles.locBanner, { backgroundColor: isDarkMode ? 'rgba(56,189,248,0.06)' : 'rgba(56,189,248,0.12)', borderColor: T.border }]}>
-                                                 <Text style={[styles.locText, { color: isDarkMode ? '#38BDF8' : '#0284C7' }]}>{locationLabel}</Text>
+                                             <View style={[styles.locBanner, { backgroundColor: 'rgba(245, 197, 24, 0.06)', borderColor: T.border }]}>
+                                                 <Text style={[styles.locText, { color: T.accent1 }]}>{locationLabel}</Text>
                                              </View>
                                          ) : null}
                                     </>
@@ -462,7 +535,7 @@ export default function HomeScreen({ navigation }) {
                                                 style={[
                                                     styles.timeOptionBtn,
                                                     { backgroundColor: T.elevated, borderColor: T.border },
-                                                    timeOption === 'immediate' && { borderColor: '#38BDF8', backgroundColor: isDarkMode ? 'rgba(56,189,248,0.06)' : 'rgba(56,189,248,0.12)' },
+                                                    timeOption === 'immediate' && { borderColor: T.accent1, backgroundColor: 'rgba(245, 197, 24, 0.08)' },
                                                     isImmUnavailable && styles.timeOptionBtnDisabled
                                                 ]}
                                                 onPress={() => {
@@ -474,11 +547,11 @@ export default function HomeScreen({ navigation }) {
                                                 disabled={isImmUnavailable}
                                             >
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                                                    <Zap size={14} color={timeOption === 'immediate' ? '#38BDF8' : T.sub} />
+                                                    <Zap size={14} color={timeOption === 'immediate' ? T.accent1 : T.sub} />
                                                     <Text style={[
                                                         styles.timeOptionText,
                                                         { color: T.sub },
-                                                        timeOption === 'immediate' && { color: '#38BDF8', fontWeight: '700' },
+                                                        timeOption === 'immediate' && { color: T.accent1, fontWeight: '700' },
                                                         isImmUnavailable && styles.timeOptionTextDisabled
                                                     ]}>
                                                         Immediate {isImmUnavailable ? '(Unavailable)' : ''}
@@ -490,18 +563,18 @@ export default function HomeScreen({ navigation }) {
                                                 style={[
                                                     styles.timeOptionBtn,
                                                     { backgroundColor: T.elevated, borderColor: T.border },
-                                                    timeOption === 'later' && { borderColor: '#38BDF8', backgroundColor: isDarkMode ? 'rgba(56,189,248,0.06)' : 'rgba(56,189,248,0.12)' }
+                                                    timeOption === 'later' && { borderColor: T.accent1, backgroundColor: 'rgba(245, 197, 24, 0.08)' }
                                                 ]}
                                                 onPress={() => {
                                                     setShowSlotsModal(true);
                                                 }}
                                             >
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                                                    <Clock size={14} color={timeOption === 'later' ? '#38BDF8' : T.sub} />
+                                                    <Clock size={14} color={timeOption === 'later' ? T.accent1 : T.sub} />
                                                     <Text style={[
                                                         styles.timeOptionText,
                                                         { color: T.sub },
-                                                        timeOption === 'later' && { color: '#38BDF8', fontWeight: '700' }
+                                                        timeOption === 'later' && { color: T.accent1, fontWeight: '700' }
                                                     ]}>
                                                         Book for Later
                                                     </Text>
@@ -510,7 +583,7 @@ export default function HomeScreen({ navigation }) {
                                         </View>
 
                                         {timeOption === 'later' && (
-                                            <View style={[styles.selectedSlotDisplay, { backgroundColor: isDarkMode ? 'rgba(0,229,255,0.04)' : T.elevated, borderColor: T.border }]}>
+                                            <View style={[styles.selectedSlotDisplay, { backgroundColor: 'rgba(245, 197, 24, 0.04)', borderColor: T.border }]}>
                                                 <Text style={[styles.selectedSlotLabel, { color: T.sub }]}>Selected Slot:</Text>
                                                 <Text style={[styles.selectedSlotValue, { color: T.textLight }]}>{timeSlot}</Text>
                                                 <TouchableOpacity onPress={() => setShowSlotsModal(true)}>
@@ -559,12 +632,12 @@ export default function HomeScreen({ navigation }) {
                         {/* How it works */}
                         <Text style={[styles.sectionTitle, { color: T.textLight }]}>How It Works</Text>
                         {[
-                            { step:'1', Icon: Mic,  iconColor: '#38BDF8', title:'Describe your need', desc:'Type in English, Urdu or Roman Urdu' },
-                            { step:'2', Icon: Bot,  iconColor: '#D4AF37', title:'AI finds providers', desc:'Ranked by distance & rating near the address' },
-                            { step:'3', Icon: Car,  iconColor: '#10B981', title:'Track live arrival',  desc:'Watch provider en route on the map' },
+                            { step:'1', Icon: Mic,  iconColor: '#F5C518', title:'Describe your need', desc:'Type in English, Urdu or Roman Urdu' },
+                            { step:'2', Icon: Bot,  iconColor: '#F5C518', title:'AI finds providers', desc:'Ranked by distance & rating near the address' },
+                            { step:'3', Icon: Car,  iconColor: '#F5C518', title:'Track live arrival',  desc:'Watch provider en route on the map' },
                         ].map(card => (
                             <View key={card.step} style={[styles.howCard, { backgroundColor: T.card, borderColor: T.border }]}>
-                                <View style={[styles.howStep, { backgroundColor: isDarkMode ? 'rgba(56,189,248,0.10)' : 'rgba(56,189,248,0.18)' }]}><Text style={styles.howStepText}>{card.step}</Text></View>
+                                <View style={[styles.howStep, { backgroundColor: 'rgba(245, 197, 24, 0.10)' }]}><Text style={styles.howStepText}>{card.step}</Text></View>
                                 <View style={[styles.howIconWrap, { backgroundColor: T.elevated, borderColor: T.border }]}>
                                     <card.Icon size={24} color={card.iconColor} strokeWidth={1.8} />
                                 </View>
@@ -602,13 +675,13 @@ export default function HomeScreen({ navigation }) {
                                 return (
                                     <TouchableOpacity
                                         key={s.dateKey}
-                                        style={[styles.dayCard, { backgroundColor: T.elevated, borderColor: T.border }, isSelected && { borderColor: '#38BDF8', backgroundColor: isDarkMode ? 'rgba(56,189,248,0.06)' : 'rgba(56,189,248,0.12)' }]}
+                                        style={[styles.dayCard, { backgroundColor: T.elevated, borderColor: T.border }, isSelected && { borderColor: T.accent1, backgroundColor: 'rgba(245, 197, 24, 0.08)' }]}
                                         onPress={() => {
                                             setSelectedDayKey(s.dateKey);
                                             setSelectedDayLabel(`${s.dayLabel}, ${s.dateString}`);
                                         }}
                                     >
-                                        <Text style={[styles.dayCardTitle, { color: isSelected ? '#38BDF8' : T.sub, fontWeight: '700' }]}>{s.dayLabel}</Text>
+                                        <Text style={[styles.dayCardTitle, { color: isSelected ? T.accent1 : T.sub, fontWeight: '700' }]}>{s.dayLabel}</Text>
                                         <Text style={[styles.dayCardSub, { color: isSelected ? T.textLight : T.sub }]}>{s.dateString}</Text>
                                     </TouchableOpacity>
                                 );
@@ -623,10 +696,10 @@ export default function HomeScreen({ navigation }) {
                                 return (
                                     <TouchableOpacity
                                         key={t}
-                                        style={[styles.timeChip, { backgroundColor: T.elevated, borderColor: T.border }, isSelected && { borderColor: '#38BDF8', backgroundColor: isDarkMode ? 'rgba(56,189,248,0.06)' : 'rgba(56,189,248,0.12)' }]}
+                                        style={[styles.timeChip, { backgroundColor: T.elevated, borderColor: T.border }, isSelected && { borderColor: T.accent1, backgroundColor: 'rgba(245, 197, 24, 0.08)' }]}
                                         onPress={() => setSelectedTime(t)}
                                     >
-                                        <Text style={[styles.timeChipText, { color: isSelected ? '#38BDF8' : T.sub, fontWeight: isSelected ? '700' : '500' }]}>{t}</Text>
+                                        <Text style={[styles.timeChipText, { color: isSelected ? T.accent1 : T.sub, fontWeight: isSelected ? '700' : '500' }]}>{t}</Text>
                                     </TouchableOpacity>
                                 );
                             })}
@@ -759,7 +832,7 @@ const makeStyles = (T) => StyleSheet.create({
     },
     timeOptionBtnActive: {
         borderColor: C.primary,
-        backgroundColor: 'rgba(56,189,248,0.06)',
+        backgroundColor: 'rgba(245, 197, 24, 0.06)',
     },
     timeOptionText: {
         color: C.sub,
@@ -780,13 +853,13 @@ const makeStyles = (T) => StyleSheet.create({
     selectedSlotDisplay: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(0,229,255,0.04)',
+        backgroundColor: 'rgba(245, 197, 24, 0.04)',
         borderRadius: 14,
         paddingHorizontal: 14,
         paddingVertical: 12,
         marginBottom: 14,
         borderWidth: 1,
-        borderColor: 'rgba(0,229,255,0.15)',
+        borderColor: 'rgba(245, 197, 24, 0.15)',
         gap: 8,
     },
     selectedSlotLabel: {
@@ -798,6 +871,22 @@ const makeStyles = (T) => StyleSheet.create({
         fontSize: 12,
         fontWeight: '700',
         flex: 1,
+    },
+    locationPill: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 24,
+        borderWidth: 1,
+        marginBottom: 16,
+        alignSelf: 'center',
+        maxWidth: '90%',
+    },
+    locationPillText: {
+        fontSize: 12,
+        fontWeight: '700',
     },
     changeSlotText: {
         color: C.primary,
@@ -869,7 +958,7 @@ const makeStyles = (T) => StyleSheet.create({
     },
     dayCardActive: {
         borderColor: C.primary,
-        backgroundColor: 'rgba(0,229,255,0.05)',
+        backgroundColor: 'rgba(245, 197, 24, 0.05)',
     },
     dayCardTitle: {
         color: C.sub,
@@ -903,8 +992,8 @@ const makeStyles = (T) => StyleSheet.create({
         borderColor: 'rgba(255,255,255,0.08)',
     },
     timeChipActive: {
-        borderColor: C.purple,
-        backgroundColor: 'rgba(124,58,237,0.08)',
+        borderColor: C.primary,
+        backgroundColor: 'rgba(245, 197, 24, 0.08)',
     },
     timeChipText: {
         color: C.sub,

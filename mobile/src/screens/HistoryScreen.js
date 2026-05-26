@@ -302,7 +302,7 @@ const makeStyles = (T) => StyleSheet.create({
     metaText:  { ...T.fCaption, color: T.sub },
 
     bookingForOthersTag: {
-        backgroundColor: 'rgba(56, 189, 248, 0.08)',
+        backgroundColor: 'rgba(245, 197, 24, 0.08)',
         borderRadius: T.r2,
         paddingHorizontal: 8,
         paddingVertical: 4,
@@ -310,7 +310,7 @@ const makeStyles = (T) => StyleSheet.create({
         alignSelf: 'flex-start',
     },
     bookingForOthersText: {
-        color: '#38BDF8',
+        color: T.accent1,
         fontSize: 10,
         fontWeight: '700',
     },
@@ -320,16 +320,16 @@ const makeStyles = (T) => StyleSheet.create({
     completedRow:  { marginTop: T.sp2 },
     completedText: { ...T.fCaption, color: T.success },
     trackLiveContainer: {
-        backgroundColor: 'rgba(0, 229, 255, 0.08)',
+        backgroundColor: 'rgba(245, 197, 24, 0.08)',
         borderRadius: T.r2,
         paddingHorizontal: 8,
         paddingVertical: 6,
         marginTop: T.sp3,
         borderWidth: 1,
-        borderColor: 'rgba(0, 229, 255, 0.25)',
+        borderColor: 'rgba(245, 197, 24, 0.25)',
     },
     trackLiveText: {
-        color: '#00E5FF',
+        color: T.accent1,
         fontSize: 10,
         fontWeight: '700',
         textAlign: 'center',

@@ -14,21 +14,21 @@ const { width } = Dimensions.get('window');
 const SLIDES = [
     {
         Icon: Wrench,
-        iconColor: '#38BDF8',
+        iconColor: '#F5C518',
         title: 'خوش آمدید — اہلِ فن',
         subtitle: 'The smart, agentic home services marketplace designed to make your life effortless.',
         agenda: '⚡ On-demand local pros at your doorstep\n🛡️ Safe, vetted, and top-rated providers\n🇵🇰 Designed for Pakistan, multilingual support'
     },
     {
         Icon: Bot,
-        iconColor: '#D4AF37',
+        iconColor: '#F5C518',
         title: 'AI Agent Orchestrator',
         subtitle: 'No complex menus. Simply describe your problem in English, Roman Urdu, or Urdu.',
         agenda: '🔍 Natural language service interpretation\n📊 Automatic provider ranking and distance score\n🤝 Transparent service agreements and fixed estimates'
     },
     {
         Icon: MapPin,
-        iconColor: '#10B981',
+        iconColor: '#F5C518',
         title: 'Seamless Service Tracking',
         subtitle: 'Never guess provider arrival times. Real-time updates right on your screen.',
         agenda: '📍 Precise GPS map tracking & routing\n🔔 Auto notifications & 2-hr reminder alarms\n📭 Completely automated transaction receipts'
@@ -121,7 +121,7 @@ export default function OnboardingScreen() {
     const IconComponent = slide.Icon;
 
     return (
-        <Animated.View style={{ flex: 1, opacity: exitAnim, backgroundColor: '#0A0B0D' }}>
+        <Animated.View style={{ flex: 1, opacity: exitAnim, backgroundColor: '#0B0C0E' }}>
             {/* Header with safe area aware Skip button */}
             <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
                 <TouchableOpacity
@@ -160,7 +160,7 @@ export default function OnboardingScreen() {
                     ]}
                 >
                     <LinearGradient
-                        colors={['rgba(56,189,248,0.12)', 'rgba(212,175,55,0.06)']}
+                        colors={['rgba(245,197,24,0.12)', 'rgba(212,175,55,0.06)']}
                         style={styles.iconGradient}
                     >
                         <IconComponent size={48} color={slide.iconColor} strokeWidth={1.5} />
@@ -244,12 +244,12 @@ export default function OnboardingScreen() {
                 {/* Primary CTA */}
                 <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
                     <LinearGradient
-                        colors={['#38BDF8', '#0284C7']}
+                        colors={GRADIENTS.brand}
                         style={styles.nextGrad}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
                     >
-                        <Text style={styles.nextText}>
+                        <Text style={[styles.nextText, { color: '#0B0C0E' }]}>
                             {index === SLIDES.length - 1 ? 'شروع کریں  →' : 'Continue'}
                         </Text>
                     </LinearGradient>
@@ -262,7 +262,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
     safe: {
         flex: 1,
-        backgroundColor: '#0A0B0D',
+        backgroundColor: '#0B0C0E',
     },
     header: {
         flexDirection: 'row',
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
         height: 110,
         borderRadius: 32,
         borderWidth: 1,
-        borderColor: 'rgba(56, 189, 248, 0.20)',
+        borderColor: 'rgba(245, 197, 24, 0.16)',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -325,16 +325,16 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     agendaCard: {
-        backgroundColor: 'rgba(18, 20, 23, 0.95)',
+        backgroundColor: '#15181F',
         borderRadius: 20,
         padding: 20,
         width: '100%',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.07)',
+        borderColor: 'rgba(245, 197, 24, 0.08)',
         ...SHADOWS.card,
     },
     agendaTitle: {
-        color: '#38BDF8',
+        color: '#F5C518',
         fontSize: 11,
         fontWeight: '700',
         letterSpacing: 2,
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     },
     activeDot: {
         width: 24,
-        backgroundColor: '#38BDF8',
+        backgroundColor: '#F5C518',
         borderRadius: 4,
     },
     nextBtn: {

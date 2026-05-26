@@ -31,7 +31,7 @@ function AltRow({ p, rank }) {
     const isTop = rank === 0;
     return (
         <View style={[styles.altRow, { backgroundColor: T.card, borderColor: T.border }, isTop && styles.altRowTop]}>
-            {isTop && <LinearGradient colors={['rgba(26,107,255,0.12)','rgba(26,107,255,0.04)']} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />}
+            {isTop && <LinearGradient colors={['rgba(245,197,24,0.12)','rgba(245,197,24,0.04)']} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />}
             {isTop && <View style={styles.altAccentBar} />}
             <View style={[styles.altRankBadge, { backgroundColor: T.elevated }]}>
                 <Text style={{ fontSize: 18 }}>{rankIcon}</Text>
@@ -124,7 +124,7 @@ export default function ResultsScreen({ route, navigation }) {
             >
                 {/* ── Winner hero card ──────────────────────────────────── */}
                 <Animated.View style={{ transform: [{ translateY: slideAnim }, { scale: scaleAnim }] }}>
-                    <LinearGradient colors={isDarkMode ? ['#0F1C3F','#1A2A4A'] : ['#E2E8F0','#FFFFFF']} style={[styles.winnerCard, { borderColor: isDarkMode ? 'rgba(26,107,255,0.2)' : 'rgba(15,23,42,0.08)' }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                    <LinearGradient colors={G.darkCard} style={[styles.winnerCard, { borderColor: 'rgba(245,197,24,0.16)' }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                         {/* Glow orbs */}
                         <View style={styles.glowOrb1} />
                         <View style={styles.glowOrb2} />
@@ -135,7 +135,7 @@ export default function ResultsScreen({ route, navigation }) {
                                     <Text style={styles.winnerAvatarText}>{provider.provider_name[0]}</Text>
                                 </LinearGradient>
                                 {/* Online status */}
-                                <View style={[styles.onlineDot, { backgroundColor: provider.available ? T.success : T.error, borderColor: isDarkMode ? '#0F1C3F' : '#FFFFFF' }]} />
+                                <View style={[styles.onlineDot, { backgroundColor: provider.available ? T.success : T.error, borderColor: '#15181F' }]} />
                             </View>
                             <View style={{ flex: 1 }}>
                                 <LinearGradient colors={G.accent} style={styles.aiBadge} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
@@ -148,8 +148,8 @@ export default function ResultsScreen({ route, navigation }) {
 
                         <View style={styles.statRow}>
                             <StatBox icon="⭐" label="Rating"    value={provider.rating}                    color="#F5A623" />
-                            <StatBox icon="📍" label="Distance"  value={provider.distance_km + ' km'}        color="#1A6BFF" />
-                            <StatBox icon="⏱"  label="ETA"       value={provider.estimated_arrival}          color="#8B5CF6" />
+                            <StatBox icon="📍" label="Distance"  value={provider.distance_km + ' km'}        color="#F5C518" />
+                            <StatBox icon="⏱"  label="ETA"       value={provider.estimated_arrival}          color="#F5C518" />
                             <StatBox icon="⚡" label="Response"  value={provider.response_time_mins + ' min'} color="#22C55E" />
                         </View>
 
@@ -216,25 +216,25 @@ const makeStyles = (T) => StyleSheet.create({
     backText:     { color: '#fff', fontSize: 20, fontWeight: '700' },
     headerTitle:  { ...T.fH2, color: T.textLight },
     headerSub:    { ...T.fCaption, color: T.sub, marginTop: 2 },
-    countBadge:   { backgroundColor: 'rgba(26,107,255,0.15)', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, borderColor: 'rgba(26,107,255,0.3)' },
-    countText:    { ...T.fCaption, color: '#1A6BFF', fontWeight: '700' },
+    countBadge:   { backgroundColor: 'rgba(245,197,24,0.15)', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, borderColor: 'rgba(245,197,24,0.3)' },
+    countText:    { ...T.fCaption, color: '#F5C518', fontWeight: '700' },
 
     scroll: { paddingHorizontal: T.sp5, paddingTop: T.sp4 },
     section: { marginTop: T.sp4 },
     sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: T.sp3 },
     sectionTitle:  { ...T.fH3, color: T.textLight },
-    kmBadge:       { backgroundColor: 'rgba(26,107,255,0.1)', borderRadius: 10, paddingHorizontal: T.sp3, paddingVertical: T.sp1, borderWidth: 1, borderColor: 'rgba(26,107,255,0.2)' },
-    kmBadgeText:   { ...T.fCaption, color: '#1A6BFF', fontWeight: '700' },
+    kmBadge:       { backgroundColor: 'rgba(245,197,24,0.1)', borderRadius: 10, paddingHorizontal: T.sp3, paddingVertical: T.sp1, borderWidth: 1, borderColor: 'rgba(245,197,24,0.2)' },
+    kmBadgeText:   { ...T.fCaption, color: '#F5C518', fontWeight: '700' },
 
     // Winner card
-    winnerCard:   { borderRadius: T.r7, padding: T.sp6, marginBottom: T.sp4, borderWidth: 1, borderColor: 'rgba(26,107,255,0.2)', overflow: 'hidden', ...SHADOWS.focus },
-    glowOrb1:     { position: 'absolute', width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(26,107,255,0.12)', top: -40, right: -40 },
-    glowOrb2:     { position: 'absolute', width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(240,100,73,0.08)', bottom: 20, left: -20 },
+    winnerCard:   { borderRadius: T.r7, padding: T.sp6, marginBottom: T.sp4, borderWidth: 1, borderColor: 'rgba(245,197,24,0.16)', overflow: 'hidden', ...SHADOWS.focus },
+    glowOrb1:     { position: 'absolute', width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(245,197,24,0.05)', top: -40, right: -40 },
+    glowOrb2:     { position: 'absolute', width: 100, height: 100, borderRadius: 50, backgroundColor: 'rgba(245,197,24,0.03)', bottom: 20, left: -20 },
     winnerTop:    { flexDirection: 'row', alignItems: 'flex-start', gap: T.sp4, marginBottom: T.sp5 },
     winnerAvatarWrap: { position: 'relative' },
     winnerAvatar: { width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center' },
     winnerAvatarText: { color: '#fff', fontSize: 28, fontWeight: '800' },
-    onlineDot:    { position: 'absolute', bottom: 2, right: 2, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#0F1C3F' },
+    onlineDot:    { position: 'absolute', bottom: 2, right: 2, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#15181F' },
     aiBadge:      { borderRadius: 10, paddingHorizontal: T.sp3, paddingVertical: 3, alignSelf: 'flex-start', marginBottom: T.sp2 },
     aiBadgeText:  { ...T.fCaption, color: '#fff', fontWeight: '700' },
     winnerName:   { ...T.fH1, color: '#fff', marginBottom: 4 },
@@ -255,13 +255,13 @@ const makeStyles = (T) => StyleSheet.create({
 
     // Alt rows
     altRow:      { backgroundColor: T.card, borderRadius: T.r4, padding: T.sp4, marginBottom: T.sp2, borderWidth: 1, borderColor: T.border, flexDirection: 'row', alignItems: 'center', gap: T.sp3, overflow: 'hidden', ...SHADOWS.card },
-    altRowTop:   { borderColor: 'rgba(26,107,255,0.25)' },
-    altAccentBar:{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, backgroundColor: '#1A6BFF' },
+    altRowTop:   { borderColor: 'rgba(245,197,24,0.25)' },
+    altAccentBar:{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, backgroundColor: '#F5C518' },
     altRankBadge:{ width: 36, height: 36, borderRadius: 18, backgroundColor: T.elevated, justifyContent: 'center', alignItems: 'center' },
     altName:     { ...T.fH3, color: T.textLight },
     altLocation: { ...T.fCaption, color: T.sub, marginTop: 2 },
     altRating:   { ...T.fCaption, color: '#F5A623', fontWeight: '700' },
-    altDist:     { ...T.fCaption, color: '#1A6BFF', fontWeight: '600' },
+    altDist:     { ...T.fCaption, color: '#F5C518', fontWeight: '600' },
     altEta:      { ...T.fCaption, color: T.sub },
     unavailPill: { backgroundColor: 'rgba(239,68,68,0.12)', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 },
     unavailText: { ...T.fCaption, color: T.error, fontWeight: '700' },
