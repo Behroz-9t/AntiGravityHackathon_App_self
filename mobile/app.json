@@ -32,10 +32,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "owner": "behroz123",
     "extra": {
       "eas": {
-        "projectId": "1d7d73e5-14aa-4535-a62b-9a984fc2dba0"
+        "projectId": "a7fc041f-5b6d-40ef-92a9-54c1c1d68035"
       }
     }
   }
