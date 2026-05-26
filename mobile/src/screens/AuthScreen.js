@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {
     View, Text, StyleSheet, TextInput,
-    TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView
+    TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView,
+    ActivityIndicator, Modal
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,6 +18,8 @@ export default function AuthScreen() {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [loaderText, setLoaderText] = useState('');
 
     const validateEmail = (val) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,9 +39,25 @@ export default function AuthScreen() {
                 setErrorMsg('Phone number must be exactly 11 digits (e.g. 03001234567).');
                 return;
             }
-            const res = await login(cleanPhone, password);
-            if (!res.success) {
-                setErrorMsg(res.error);
+
+            setIsLoading(true);
+            setLoaderText('Authenticating securely...');
+
+            const timer = setTimeout(() => {
+                setLoaderText('Warming up secure servers...\n(This can take a moment if idle)');
+            }, 3000);
+
+            try {
+                const res = await login(cleanPhone, password);
+                clearTimeout(timer);
+                setIsLoading(false);
+                if (!res.success) {
+                    setErrorMsg(res.error);
+                }
+            } catch (err) {
+                clearTimeout(timer);
+                setIsLoading(false);
+                setErrorMsg('Connection failed. Please try again.');
             }
         } else {
             if (!name.trim() || !email.trim() || !cleanPhone || !password) {
@@ -53,9 +72,25 @@ export default function AuthScreen() {
                 setErrorMsg('Phone number must be exactly 11 digits (e.g. 03001234567).');
                 return;
             }
-            const res = await register(name, email.trim(), cleanPhone, password);
-            if (!res.success) {
-                setErrorMsg(res.error);
+
+            setIsLoading(true);
+            setLoaderText('Creating your account...');
+
+            const timer = setTimeout(() => {
+                setLoaderText('Warming up secure servers...\n(This can take a moment if idle)');
+            }, 3000);
+
+            try {
+                const res = await register(name.trim(), email.trim(), cleanPhone, password);
+                clearTimeout(timer);
+                setIsLoading(false);
+                if (!res.success) {
+                    setErrorMsg(res.error);
+                }
+            } catch (err) {
+                clearTimeout(timer);
+                setIsLoading(false);
+                setErrorMsg('Connection failed. Please try again.');
             }
         }
     };
@@ -174,6 +209,22 @@ export default function AuthScreen() {
                     <Text style={styles.footerText}>Pakistan's first AI-powered home services platform</Text>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Loading Modal */}
+            <Modal
+                transparent={true}
+                animationType="fade"
+                visible={isLoading}
+                onRequestClose={() => setIsLoading(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.loaderCard}>
+                        <ActivityIndicator size="large" color={T.accent1} style={{ marginBottom: 16 }} />
+                        <Text style={styles.loaderTitle}>{isLogin ? 'Signing In' : 'Creating Account'}</Text>
+                        <Text style={styles.loaderSub}>{loaderText}</Text>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -356,5 +407,36 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 24,
         letterSpacing: 0.2,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(11, 12, 14, 0.85)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loaderCard: {
+        width: 280,
+        backgroundColor: '#15181F',
+        borderRadius: 28,
+        borderWidth: 1.5,
+        borderColor: 'rgba(245, 197, 24, 0.18)',
+        padding: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...SHADOWS.card,
+    },
+    loaderTitle: {
+        color: '#F8FAFC',
+        fontSize: 18,
+        fontWeight: '800',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    loaderSub: {
+        color: '#8E94A2',
+        fontSize: 12,
+        fontWeight: '500',
+        textAlign: 'center',
+        lineHeight: 18,
     },
 });
