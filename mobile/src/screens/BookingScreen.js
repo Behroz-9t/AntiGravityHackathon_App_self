@@ -55,16 +55,21 @@ export default function BookingScreen({ route, navigation }) {
 
         // 1. Booking confirmation push notification (immediate, always)
         await sendImmediateNotification(
-            '✅ Booking Confirmed — ???? ??',
+            '✅ Booking Confirmed — أهلِ فن',
             `${providerName} is assigned for your ${service} — ${timeSlot}.`
         );
 
         // 2. Schedule 2-hour reminder for non-immediate slots
         if (isScheduled) {
-            const slotDate = parseTimeSlot(timeSlot);
+            const slotDate = parseTimeSlot(
+                timeSlot,
+                data?.user_lat,
+                data?.user_lng,
+                bookingMeta?.recipientAddress || intent?.location
+            );
             if (slotDate) {
                 await scheduleReminderNotification(
-                    '⏰ Upcoming Booking — ???? ??',
+                    '⏰ Upcoming Booking — أهلِ فن',
                     `Reminder: ${providerName} is arriving in 2 hours for your ${service} at ${timeSlot}.`,
                     slotDate
                 );
@@ -205,15 +210,20 @@ export default function BookingScreen({ route, navigation }) {
 
                                 // Confirmation notification
                                 await sendImmediateNotification(
-                                    '✅ Booking Confirmed — اہل فن',
+                                    '✅ Booking Confirmed — أهلِ فن',
                                     `${providerName} is assigned for your ${service} — ${timeSlot}.`
                                 );
 
                                 // 2-hour reminder
-                                const slotDate = parseTimeSlot(timeSlot);
+                                const slotDate = parseTimeSlot(
+                                    timeSlot,
+                                    data?.user_lat,
+                                    data?.user_lng,
+                                    bookingMeta?.recipientAddress || intent?.location
+                                );
                                 if (slotDate) {
                                     await scheduleReminderNotification(
-                                        '⏰ Upcoming Booking — اہل فن',
+                                        '⏰ Upcoming Booking — أهلِ فن',
                                         `Reminder: ${providerName} is arriving in 2 hours for your ${service} at ${timeSlot}.`,
                                         slotDate
                                     );

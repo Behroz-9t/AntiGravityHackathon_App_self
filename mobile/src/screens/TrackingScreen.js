@@ -24,19 +24,63 @@ const STATUSES = [
 
 
 
-export function parseTimeSlot(str) {
-    if (!str) return null;
-    const s = str.toLowerCase().trim();
-    if (s.includes('immediate') || s.includes('as soon as') || s.includes('now')) {
-        return new Date(); // Immediate
+export function getLocationTimezoneOffset(lat, lng, locationStr) {
+    // Default to Pakistan Standard Time (GMT+5) which is +300 minutes
+    let offsetMinutes = 300; 
+
+    if (lat !== undefined && lat !== null && lng !== undefined && lng !== null) {
+        if (lat >= 23.0 && lat <= 38.0 && lng >= 60.0 && lng <= 79.0) {
+            return 300; // Pakistan
+        }
     }
 
-    const now = new Date();
-    let target = new Date(now);
+    if (locationStr) {
+        const lower = locationStr.toLowerCase();
+        if (lower.includes('pakistan') || lower.includes('islamabad') || lower.includes('karachi') || lower.includes('lahore')) {
+            return 300;
+        }
+    }
 
-    // Check if tomorrow
-    if (s.includes('tomorrow')) {
-        target.setDate(now.getDate() + 1);
+    return -new Date().getTimezoneOffset();
+}
+
+export function parseTimeSlot(str, lat = null, lng = null, locationStr = null) {
+    if (!str) return null;
+    const s = str.toLowerCase().trim();
+    
+    const now = new Date();
+    const offsetMinutes = getLocationTimezoneOffset(lat, lng, locationStr);
+
+    // Get current date/time components at the location's timezone
+    // To do this, we shift the UTC time by the location's offset to get the local components
+    const localTimeMs = now.getTime() + (offsetMinutes * 60 * 1000);
+    const localDate = new Date(localTimeMs);
+    
+    let targetYear = localDate.getUTCFullYear();
+    let targetMonth = localDate.getUTCMonth();
+    let targetDay = localDate.getUTCDate();
+
+    if (s.includes('immediate') || s.includes('as soon as') || s.includes('now')) {
+        return now;
+    }
+
+    // E.g. "Wednesday, 27 May at 09:00 AM" or "Today, 26 May at 05:00 PM"
+    const dateMatch = s.match(/(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/);
+    if (dateMatch) {
+        targetDay = parseInt(dateMatch[1], 10);
+        const monthStr = dateMatch[2];
+        const monthMap = {
+            jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+            jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+        };
+        targetMonth = monthMap[monthStr];
+    } else {
+        if (s.includes('tomorrow')) {
+            const tempDate = new Date(localTimeMs + 24 * 60 * 60 * 1000);
+            targetDay = tempDate.getUTCDate();
+            targetMonth = tempDate.getUTCMonth();
+            targetYear = tempDate.getUTCFullYear();
+        }
     }
 
     // Default hours
@@ -53,8 +97,20 @@ export function parseTimeSlot(str) {
         hours = 21;
     }
 
+    // Extract the time part if "at " is present to prevent date digits (e.g. 26 May) matching as hours
+    let timePart = s;
+    if (s.includes('at ')) {
+        timePart = s.split('at ')[1];
+    } else {
+        // Fallback: look for the time sequence at the end or match a time pattern like \d{1,2}:\d{2} or \d{1,2}\s*(am|pm)
+        const specificTimeMatch = s.match(/(\d{1,2}):(\d{2})\s*(am|pm)?/) || s.match(/(\d{1,2})\s*(am|pm)/);
+        if (specificTimeMatch) {
+            timePart = specificTimeMatch[0];
+        }
+    }
+
     // Match HH:MM or HH
-    const timeMatch = s.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/);
+    const timeMatch = timePart.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/);
     if (timeMatch) {
         let parsedHours = parseInt(timeMatch[1], 10);
         const parsedMinutes = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
@@ -69,16 +125,19 @@ export function parseTimeSlot(str) {
         minutes = parsedMinutes;
     }
 
-    target.setHours(hours, minutes, 0, 0);
+    // Construct the target date UTC epoch representing this time at the location
+    const targetUtcEpoch = Date.UTC(targetYear, targetMonth, targetDay, hours, minutes, 0, 0) - (offsetMinutes * 60 * 1000);
+    const target = new Date(targetUtcEpoch);
 
-    if (target.getTime() < now.getTime() && !s.includes('tomorrow') && !s.includes('today')) {
-        if (target.getHours() < now.getHours()) {
-            target.setDate(now.getDate() + 1);
-        }
+    // Fallback: If target is in the past, adjust to tomorrow (only if day was not explicitly set via matching)
+    if (target.getTime() < now.getTime() && !dateMatch && !s.includes('tomorrow') && !s.includes('today')) {
+        const nextDayLocalMs = targetUtcEpoch + 24 * 60 * 60 * 1000;
+        return new Date(nextDayLocalMs);
     }
 
     return target;
 }
+
 
 export function formatCountdown(secs) {
     const h = Math.floor(secs / 3600);
@@ -114,7 +173,12 @@ export default function TrackingScreen({ route, navigation }) {
 
     const getInitialCountdown = () => {
         if (!isScheduledInitial) return 0;
-        const target = parseTimeSlot(bookingMeta.timeSlot);
+        const target = parseTimeSlot(
+            bookingMeta.timeSlot,
+            userLat || bookingData?.user_lat || intentData?.user_lat,
+            userLng || bookingData?.user_lng || intentData?.user_lng,
+            bookingMeta?.recipientAddress || intentData?.location
+        );
         if (!target) return 0;
         const diffSecs = Math.max(0, Math.floor((target.getTime() - Date.now()) / 1000));
         return diffSecs;
