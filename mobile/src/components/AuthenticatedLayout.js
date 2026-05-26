@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSidePanel } from './SidePanelContext';
 import SidePanel from './SidePanel';
@@ -18,34 +18,69 @@ export default function AuthenticatedLayout({ children }) {
     const styles = makeStyles(T);
     const isMobile = screenWidth < MOBILE_BREAKPOINT;
 
+    // Root screen scale-down and shift animation (100% native driver optimized)
+    const layoutProgress = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(layoutProgress, {
+            toValue: isOpen ? 1 : 0,
+            duration: 250,
+            useNativeDriver: true,
+        }).start();
+    }, [isOpen]);
+
+    const contentScale = layoutProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 0.96],
+    });
+
+    const contentTranslateX = layoutProgress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, 14],
+    });
+
     if (isMobile) {
         return (
             // This View is the root that the absolutely-positioned SidePanel slides over
             <View style={styles.mobileRoot}>
-                {/* Fixed header bar */}
-                <View style={[styles.mobileHeader, { paddingTop: insets.top + 8 }]}>
-                    <TouchableOpacity
-                        style={styles.hamburgerBtn}
-                        onPress={togglePanel}
-                        activeOpacity={0.7}
-                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    >
-                        {isOpen
-                            ? <X size={20} color={T.accent1} strokeWidth={2.5} />
-                            : <Menu size={20} color={T.accent1} strokeWidth={2.5} />
+                <Animated.View
+                    style={[
+                        { flex: 1, backgroundColor: T.bg },
+                        {
+                            transform: [
+                                { scale: contentScale },
+                                { translateX: contentTranslateX }
+                            ],
+                            borderRadius: 16,
+                            overflow: 'hidden',
                         }
-                    </TouchableOpacity>
+                    ]}
+                >
+                    {/* Fixed header bar */}
+                    <View style={[styles.mobileHeader, { paddingTop: insets.top + 8 }]}>
+                        <TouchableOpacity
+                            style={styles.hamburgerBtn}
+                            onPress={togglePanel}
+                            activeOpacity={0.7}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
+                            {isOpen
+                                ? <X size={20} color={T.accent1} strokeWidth={2.5} />
+                                : <Menu size={20} color={T.accent1} strokeWidth={2.5} />
+                            }
+                        </TouchableOpacity>
 
-                    <Text style={styles.headerTitle}>اہلِ فن</Text>
+                        <Text style={styles.headerTitle}>اہلِ فن</Text>
 
-                    {/* Spacer to balance the hamburger on the left */}
-                    <View style={{ width: 40 }} />
-                </View>
+                        {/* Spacer to balance the hamburger on the left */}
+                        <View style={{ width: 40 }} />
+                    </View>
 
-                {/* Scrollable content area below header */}
-                <View style={styles.mobileContent}>
-                    {children}
-                </View>
+                    {/* Scrollable content area below header */}
+                    <View style={styles.mobileContent}>
+                        {children}
+                    </View>
+                </Animated.View>
 
                 {/* SidePanel overlays the entire mobileRoot */}
                 <SidePanel />

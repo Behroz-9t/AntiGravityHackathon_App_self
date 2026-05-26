@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     View, Text, StyleSheet, Animated, TouchableOpacity, ScrollView,
-    SafeAreaView, useWindowDimensions, Switch,
+    SafeAreaView, useWindowDimensions, Switch, Platform,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { navigationRef } from '../navigationRef';
 import { useSidePanel } from './SidePanelContext';
 import { useBookings } from '../BookingContext';
@@ -381,6 +382,7 @@ export default function SidePanel() {
                         { opacity: backdropOpacity },
                     ]}
                 >
+                    <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
                     <TouchableOpacity
                         style={{ flex: 1 }}
                         onPress={closePanel}
